@@ -18,4 +18,10 @@
 - Docker 설치
 - Jenkins 설치
 - GitHub 토큰 발급
- 
+
+### [Window PC에 Docker, jenkins 설치, GitHub 연동하기 (2) | 난 삽질로 유학까지 다녀왔단 사실](https://everyday-spring.com/629)
+
+- Jenkins에 Github token 등록하기
+- Jenkins Pipeline GitHub Repository pull, build 하기
+- ngrok 주소 발급하기
+- GitHub Jenkins Webhook settings
