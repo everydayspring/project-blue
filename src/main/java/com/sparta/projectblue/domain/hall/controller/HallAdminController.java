@@ -19,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/admin/halls")
 @RequiredArgsConstructor
-@Tag(name = "HallAdmin", description = "관리자 전용 공연장 API")
+@Tag(name = "Admin-Hall", description = "관리자 전용 공연장 API")
 public class HallAdminController {
 
     private final HallAdminService hallAdminService;

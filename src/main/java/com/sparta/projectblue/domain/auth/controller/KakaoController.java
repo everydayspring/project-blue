@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
-@Tag(name = "KakaoUser", description = "카카오 회원가입 로그인 API")
+@Tag(name = "User-Kakao", description = "카카오 회원가입 로그인 API")
 public class KakaoController {
 
     private final KakaoService kakaoService;

@@ -1,5 +1,6 @@
 package com.sparta.projectblue.domain.coupon.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -15,17 +16,18 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/coupons")
+@Tag(name = "Coupon", description = "쿠폰 API")
 public class CouponController {
 
     private final CouponService couponService;
 
-    @PostMapping("/first/{couponid}")
+    @PostMapping("/first/{couponId}")
     @Operation(summary = "쿠폰 발행")
     public ResponseEntity<ApiResponse<Coupon>> firstCoupon(
-            @AuthenticationPrincipal AuthUser authUser, @PathVariable Long couponid) {
+            @AuthenticationPrincipal AuthUser authUser, @PathVariable Long couponId) {
 
         return ResponseEntity.ok(
-                ApiResponse.success(couponService.firstCoupon(authUser, couponid)));
+                ApiResponse.success(couponService.firstCoupon(authUser, couponId)));
     }
 
     @GetMapping("/{id}")

@@ -9,4 +9,5 @@ import com.sparta.projectblue.domain.round.entity.Round;
 public interface RoundRepository extends JpaRepository<Round, Long> {
 
     List<Round> findByPerformanceId(Long performanceId);
+    void deleteByPerformanceId(Long performanceId);
 }

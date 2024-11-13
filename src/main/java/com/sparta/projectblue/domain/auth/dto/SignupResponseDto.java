@@ -1,8 +1,11 @@
 package com.sparta.projectblue.domain.auth.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.sparta.projectblue.domain.coupon.entity.Coupon;
 
 import lombok.Getter;
+
+import java.time.LocalDateTime;
 
 @Getter
 public class SignupResponseDto {

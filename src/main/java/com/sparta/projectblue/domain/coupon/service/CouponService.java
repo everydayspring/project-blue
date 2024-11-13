@@ -28,9 +28,19 @@ public class CouponService {
 
     @DistributedLock(key = "#couponId")
     @Transactional
-    public Coupon firstCoupon(AuthUser authUser, Long couponid) {
+    public Coupon firstCoupon(AuthUser authUser, Long couponId) {
 
-        Coupon coupon = couponRepository.findByIdOrElseThrow(couponid);
+        Coupon coupon = couponRepository.findByIdOrElseThrow(couponId);
+
+        if (usedCouponRepository.existsByCouponIdAndUserId(couponId, authUser.getId())) {
+            throw new IllegalArgumentException("이미 발급받은 쿠폰입니다.");
+        }
+        if (coupon.getCurrentQuantity() >= coupon.getMaxQuantity()) {
+            throw new IllegalArgumentException("쿠폰이 모두 소진되었습니다.");
+        }
+
+        // 발급된 쿠폰 저장
+        saveUsedCoupon(couponId, authUser);
 
         // 현재 쿠폰 수량 증가
         coupon.incrementQuantity();
@@ -79,9 +89,21 @@ public class CouponService {
         // UsedCoupon DB 저장
         UsedCoupon usedCoupon =
                 new UsedCoupon(
-                        coupon.getId(), userId, reservationId, LocalDateTime.now(), discountAmount);
+                        coupon.getId(), userId, reservationId, LocalDateTime.now(), discountAmount, LocalDateTime.now());
         usedCouponRepository.save(usedCoupon);
 
         return discountAmount;
+    }
+
+    public void saveUsedCoupon(Long couponId, AuthUser authUser) {
+        // 발급된 쿠폰 기록 저장
+        UsedCoupon usedCoupon = new UsedCoupon(
+                couponId,
+                authUser.getId(),
+                null,
+                LocalDateTime.now(),
+                getCoupon(couponId).getDiscountValue(),
+                LocalDateTime.now()
+        );
     }
 }

@@ -2,6 +2,7 @@ package com.sparta.projectblue.domain.payment.entity;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 
 import com.sparta.projectblue.domain.common.entity.BaseEntity;
@@ -53,6 +54,7 @@ public class Payment extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(name = "approved_at")
     private LocalDateTime approvedAt;
 

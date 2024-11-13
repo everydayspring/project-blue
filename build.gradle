@@ -36,7 +36,6 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	implementation 'org.springframework.boot:spring-boot-starter-aop'
 
-
 	// bcrypt
 	implementation 'at.favre.lib:bcrypt:0.10.2'
 
@@ -81,7 +80,6 @@ dependencies {
 	implementation 'org.redisson:redisson-spring-boot-starter:3.27.0'
 
 	// JUnit 5 (Jupiter)
-	// JUnit 5 (Jupiter)
 	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.3'
 	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.3'
 
@@ -91,6 +89,17 @@ dependencies {
 
 	// mail
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+
+	// monitoring
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'io.micrometer:micrometer-core'
+	implementation 'io.micrometer:micrometer-registry-prometheus'
+
+
+	// PaymentTest
+	testImplementation 'com.squareup.okhttp3:mockwebserver:4.9.3'
+
 }
 
 tasks.named('test') {

@@ -2,6 +2,7 @@ package com.sparta.projectblue.domain.coupon.entity;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 
 import com.sparta.projectblue.domain.common.entity.BaseEntity;
@@ -37,9 +38,11 @@ public class Coupon extends BaseEntity {
     @Column(nullable = false)
     private Long discountValue;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(nullable = false, name = "start_date")
     private LocalDateTime startDate;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(nullable = false, name = "end_date")
     private LocalDateTime endDate;
 

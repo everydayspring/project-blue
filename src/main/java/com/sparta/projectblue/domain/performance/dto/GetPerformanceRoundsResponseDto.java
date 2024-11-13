@@ -3,14 +3,20 @@ package com.sparta.projectblue.domain.performance.dto;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.sparta.projectblue.domain.common.enums.PerformanceStatus;
 
 import lombok.Getter;
 
 @Getter
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 public class GetPerformanceRoundsResponseDto {
 
-    private final List<RoundInfo> rounds;
+    private List<RoundInfo> rounds;
+
+    // 캐싱을 위한 기본 생성자
+    public GetPerformanceRoundsResponseDto() {
+    }
 
     public GetPerformanceRoundsResponseDto(List<RoundInfo> rounds) {
 
@@ -20,8 +26,11 @@ public class GetPerformanceRoundsResponseDto {
     @Getter
     public static class RoundInfo {
 
-        private final LocalDateTime date;
-        private final PerformanceStatus status;
+        private LocalDateTime date;
+        private PerformanceStatus status;
+
+        public RoundInfo() {
+        }
 
         public RoundInfo(LocalDateTime date, PerformanceStatus status) {
 

@@ -2,6 +2,7 @@ package com.sparta.projectblue.domain.hall.dto;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.sparta.projectblue.domain.hall.entity.Hall;
 
 import lombok.Getter;
@@ -13,7 +14,11 @@ public class UpdateHallResponseDto {
     private final String name;
     private final String address;
     private final Integer seats;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private final LocalDateTime createdAt;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private final LocalDateTime modifiedAt;
 
     public UpdateHallResponseDto(Hall hall) {

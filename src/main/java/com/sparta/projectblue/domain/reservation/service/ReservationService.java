@@ -1,11 +1,10 @@
 package com.sparta.projectblue.domain.reservation.service;
 
-import com.sparta.projectblue.config.DistributedLock;
 import com.sparta.projectblue.domain.common.dto.AuthUser;
+import com.sparta.projectblue.domain.common.enums.PaymentStatus;
 import com.sparta.projectblue.domain.common.enums.PerformanceStatus;
 import com.sparta.projectblue.domain.common.enums.ReservationStatus;
-import com.sparta.projectblue.domain.coupon.repository.CouponRepository;
-import com.sparta.projectblue.domain.coupon.service.CouponService;
+import com.sparta.projectblue.domain.email.service.EmailCreateService;
 import com.sparta.projectblue.domain.hall.entity.Hall;
 import com.sparta.projectblue.domain.hall.repository.HallRepository;
 import com.sparta.projectblue.domain.payment.entity.Payment;
@@ -24,10 +23,9 @@ import com.sparta.projectblue.domain.round.entity.Round;
 import com.sparta.projectblue.domain.round.repository.RoundRepository;
 import com.sparta.projectblue.domain.user.entity.User;
 import com.sparta.projectblue.domain.user.repository.UserRepository;
-import jakarta.persistence.EntityManager;
+import com.sparta.projectblue.sse.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RedissonClient;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,21 +50,15 @@ public class ReservationService {
     private final ReviewRepository reviewRepository;
     private final RoundRepository roundRepository;
     private final UserRepository userRepository;
-    private final CouponRepository couponRepository;
-    private final CouponService couponService;
+    private final EmailCreateService emailCreateService;
+    private final NotificationService notificationService;
 
     private final PaymentService paymentService;
 
     private final PasswordEncoder passwordEncoder;
 
-    private final RedissonClient redissonClient;
-
-    private final EntityManager entityManager;
-
-    //@Transactional
-    @DistributedLock(key = "#reservationId")
     @Transactional
-    //@DistributedLock(key = "'reservation_lock_' + #request.roundId + '_' + #seatNumber")
+//    @DistributedLock(key = "#reservationId")
     public CreateReservationResponseDto create(Long id, CreateReservationRequestDto request) {
 
         // 회차 가져옴 (예매상태확인)
@@ -95,7 +87,7 @@ public class ReservationService {
         Hall hall =
                 hallRepository
                         .findById(performance.getHallId())
-                        .orElseThrow(() -> new IllegalArgumentException("hallo not found"));
+                        .orElseThrow(() -> new IllegalArgumentException("hall not found"));
 
         // 예매 가능 티켓 매수 제한
         if (request.getSeats().size() > 4) {
@@ -137,17 +129,40 @@ public class ReservationService {
                     new ReservedSeat(newReservation.getId(), newReservation.getRoundId(), i));
         }
 
-        return new CreateReservationResponseDto(
-                newReservation.getId(),
-                performance.getTitle(),
-                round.getDate(),
-                request.getSeats(),
-                newReservation.getPrice(),
-                ReservationStatus.PENDING);
+        CreateReservationResponseDto responseDto =
+                new CreateReservationResponseDto(
+                        newReservation.getId(),
+                        performance.getTitle(),
+                        round.getDate(),
+                        request.getSeats(),
+                        newReservation.getPrice(),
+                        ReservationStatus.PENDING);
+
+
+        emailCreateService.sendReservationEmail(id, responseDto);
+
+        // 예매 성공 알림 (SSE 전송)
+        String title = "[티켓 예매 완료]";
+        String message = String.format(
+                "%s 고객님, 예매가 완료되었습니다.\n" +
+                        "상품정보: %s 공연, %s 회차, %s 공연장, %s 좌석\n" +
+                        "일시: %s로 예약되었습니다.",
+                id, performance.getTitle(), request.getRoundId(), hall.getName(), request.getSeats(),
+                round.getDate());
+
+        notificationService.notify(String.valueOf(id), title, message);
+
+        return responseDto;
     }
 
     @Transactional
     public void delete(Long id, DeleteReservationRequestDto request) throws Exception {
+
+        // 예매내역이 있는지 확인
+        Reservation reservation =
+                reservationRepository
+                        .findById(request.getReservationId())
+                        .orElseThrow(() -> new IllegalArgumentException("reservation not found"));
 
         // 사용자 가져옴
         User user =
@@ -155,16 +170,20 @@ public class ReservationService {
                         .findById(id)
                         .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
+        // 공연 정보 조회
+        Performance performance =
+                performanceRepository
+                        .findById(reservation.getPerformanceId())
+                        .orElseThrow(() -> new IllegalArgumentException("performance not found"));
+
+        if(!reservation.getUserId().equals(user.getId())) {
+            throw new IllegalArgumentException("예매자가 아닙니다");
+        }
+
         // 계정 비밀번호 확인
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new IllegalArgumentException("Incorrect password");
         }
-
-        // 예매내역이 있는지 확인
-        Reservation reservation =
-                reservationRepository
-                        .findById(request.getReservationId())
-                        .orElseThrow(() -> new IllegalArgumentException("reservation not found"));
 
         // 이미 취소 되었는지 확인
         if (reservation.getStatus().equals(ReservationStatus.CANCELED)) {
@@ -186,10 +205,18 @@ public class ReservationService {
                             .findById(reservation.getPaymentId())
                             .orElseThrow(() -> new IllegalArgumentException("payment not found"));
 
-            paymentService.cancelPayment(payment.getPaymentKey(), "예매를 취소합니다");
+            if(! payment.getStatus().equals(PaymentStatus.CANCELED)) {
+                paymentService.cancelPayment(payment.getPaymentKey(), "예매를 취소합니다");
+            }
         }
 
-        reservation.resCanceled();
+        String title = "[티켓_예매취소완료]";
+            String message =
+                    String.format(
+                            "%s 고객님, %s 공연의 예약이 취소 되었습니다.", user.getName(), performance.getTitle());
+            notificationService.notify(user.getName(), title, message);
+
+            reservation.resCanceled();
     }
 
     public GetReservationResponseDto getReservation(AuthUser user, Long reservationId) {

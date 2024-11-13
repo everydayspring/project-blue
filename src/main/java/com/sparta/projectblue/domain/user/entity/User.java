@@ -30,6 +30,9 @@ public class User extends BaseEntity {
     @Column(name = "kakao_id")
     private Long kakaoId;
 
+    @Column(name = "slack_id")
+    private String slackId;
+
     @Column(name = "is_deleted")
     private boolean isDeleted;
 

@@ -1,5 +1,6 @@
 package com.sparta.projectblue.domain.payment.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.json.simple.JSONObject;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 
 @Controller
 @RequiredArgsConstructor
+@Tag(name = "Payment", description = "결제 API (프론트에서 테스트 가능)")
 public class PaymentController {
 
     private final PaymentService paymentService;

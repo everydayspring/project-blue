@@ -2,6 +2,7 @@ package com.sparta.projectblue.domain.round.dto;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.sparta.projectblue.domain.common.enums.PerformanceStatus;
 
 import lombok.AllArgsConstructor;
@@ -13,6 +14,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UpdateRoundRequestDto {
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime date;
+
     private PerformanceStatus status;
 }

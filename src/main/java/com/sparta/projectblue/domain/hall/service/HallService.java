@@ -1,5 +1,6 @@
 package com.sparta.projectblue.domain.hall.service;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,10 +28,10 @@ public class HallService {
         return hallRepository.findAll(pageable).map(GetHallsResponseDto::new);
     }
 
+    // 캐싱 적용 대상
+    @Cacheable(value = "hall", key = "#id")
     public GetHallResponseDto getHall(Long id) {
-
         Hall hall = hallRepository.findByIdOrElseThrow(id);
-
         return new GetHallResponseDto(hall);
     }
 }

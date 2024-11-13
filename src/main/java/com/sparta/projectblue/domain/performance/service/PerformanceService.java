@@ -1,15 +1,5 @@
 package com.sparta.projectblue.domain.performance.service;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.sparta.projectblue.domain.hall.entity.Hall;
 import com.sparta.projectblue.domain.hall.repository.HallRepository;
 import com.sparta.projectblue.domain.performance.dto.*;
@@ -21,8 +11,17 @@ import com.sparta.projectblue.domain.review.entity.Review;
 import com.sparta.projectblue.domain.review.repository.ReviewRepository;
 import com.sparta.projectblue.domain.round.entity.Round;
 import com.sparta.projectblue.domain.round.repository.RoundRepository;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -45,6 +44,8 @@ public class PerformanceService {
         return performanceRepository.findByCondition(pageable, null, performanceDay, null);
     }
 
+    // 캐싱 적용 대상
+    @Cacheable(value = "performance", key = "#id")
     public GetPerformanceResponseDto getPerformance(Long id) {
         Performance performance =
                 performanceRepository
@@ -64,6 +65,8 @@ public class PerformanceService {
         return new GetPerformanceResponseDto(performance, hall, poster);
     }
 
+    // 캐싱 적용 대상
+    @Cacheable(value = "rounds", key = "#id")
     public GetPerformanceRoundsResponseDto getRounds(Long id) {
 
         // 공연 id값 검증
@@ -86,6 +89,9 @@ public class PerformanceService {
         return new GetPerformanceRoundsResponseDto(roundInfos);
     }
 
+
+    // 캐싱 적용 대상
+    @Cacheable(value = "reviews", key = "#id")
     public GetPerformanceReviewsResponseDto getReviews(Long id) {
 
         // 공연 id값 검증
@@ -106,6 +112,9 @@ public class PerformanceService {
         return new GetPerformanceReviewsResponseDto(reviewInfos);
     }
 
+
+    // 캐싱 적용 대상
+    @Cacheable(value = "performancePerformers", key = "#id")
     public GetPerformancePerformersResponseDto getPerformers(Long id) {
 
         if (performanceRepository.findById(id).isEmpty()) {

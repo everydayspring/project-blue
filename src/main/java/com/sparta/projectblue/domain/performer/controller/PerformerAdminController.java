@@ -19,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/admin/performers")
 @RequiredArgsConstructor
-@Tag(name = "PerformerAdmin", description = "관리자 전용 배우 API")
+@Tag(name = "Admin-Performer", description = "관리자 전용 배우 API")
 public class PerformerAdminController {
 
     private final PerformerAdminService performerAdminService;

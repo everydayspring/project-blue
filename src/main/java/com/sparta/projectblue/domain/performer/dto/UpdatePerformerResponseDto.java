@@ -2,6 +2,7 @@ package com.sparta.projectblue.domain.performer.dto;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.sparta.projectblue.domain.performer.entity.Performer;
 
 import lombok.Getter;
@@ -13,7 +14,11 @@ public class UpdatePerformerResponseDto {
     private final String name;
     private final String birth;
     private final String nation;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private final LocalDateTime createdAt;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private final LocalDateTime modifiedAt;
 
     public UpdatePerformerResponseDto(Performer performer) {

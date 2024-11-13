@@ -1,5 +1,6 @@
 package com.sparta.projectblue.domain.performer.entity;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Index;
@@ -13,6 +14,10 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @Entity
+//@JsonTypeInfo(
+//        use = JsonTypeInfo.Id.CLASS,
+//        property = "@class"
+//)
 @Table(name = "performers", indexes = @Index(name = "idx_performer_name", columnList = "name"))
 public class Performer extends BaseEntity {
 

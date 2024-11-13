@@ -32,8 +32,6 @@ public class AuthService {
 
     private final CouponRepository couponRepository;
 
-    private final UsedCouponRepository usedCouponRepository;
-
     private final PasswordEncoder passwordEncoder;
 
     private final JwtUtil jwtUtil;

@@ -20,13 +20,13 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/admin/performances")
-@Tag(name = "PerformanceAdmin", description = "관리자 전용 공연 API")
+@Tag(name = "Admin-Performance", description = "관리자 전용 공연 API")
 public class PerformanceAdminController {
 
     private final PerformanceAdminService performanceAdminService;
 
     @PostMapping
-    @Operation(summary = "공연 등록")
+    @Operation(summary = "공연 등록", description = "파일 첨부가 필요하여 포스트맨에서 테스트할 수 있습니다...")
     public ResponseEntity<ApiResponse<?>> create(
             @AuthenticationPrincipal AuthUser authUser,
             @RequestPart("data") CreatePerformanceRequestDto request,

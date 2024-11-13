@@ -3,6 +3,7 @@ package com.sparta.projectblue.domain.reservation.dto;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.sparta.projectblue.domain.common.enums.Category;
 import com.sparta.projectblue.domain.common.enums.ReservationStatus;
 import com.sparta.projectblue.domain.common.enums.ReviewRate;
@@ -19,8 +20,10 @@ public class GetReservationResponseDto {
     private final Category category; // performance
     private final String performanceTitle; // performance
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private final LocalDateTime round; // round
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private final LocalDateTime reservationDate; // reservation
     private final Long reservationId; // reservation
     private final ReservationStatus reservationStatus; // reservation
@@ -31,6 +34,8 @@ public class GetReservationResponseDto {
 
     private final String paymentMethod; // payment
     private final Long paymentPrice; // payment
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private final LocalDateTime paymentTime; // payment
 
     private final ReviewRate rate; // review

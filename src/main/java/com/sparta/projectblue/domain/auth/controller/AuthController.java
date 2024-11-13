@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "Auth", description = "회원가입 로그인 API")
+@Tag(name = "User-Auth", description = "회원가입 로그인 API")
 public class AuthController {
 
     private final AuthService authService;
