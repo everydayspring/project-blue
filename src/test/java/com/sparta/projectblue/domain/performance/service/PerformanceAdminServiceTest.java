@@ -78,8 +78,8 @@ public class PerformanceAdminServiceTest {
         User user = new User();
         CreatePerformanceRequestDto requestDto = new CreatePerformanceRequestDto(
                 "공연 Test",
-                "2024-11-10",
-                "2024-11-15",
+                "2027-11-10",
+                "2027-11-15",
                 5000L,
                 "CONCERT",
                 "공연 생성 테스트",
@@ -234,7 +234,7 @@ public class PerformanceAdminServiceTest {
         User user = new User();
         ReflectionTestUtils.setField(user, "userRole", UserRole.ROLE_ADMIN);
         CreatePerformanceRequestDto requestDto = new CreatePerformanceRequestDto();
-        ReflectionTestUtils.setField(requestDto,"startDate", "2024-11-10");
+        ReflectionTestUtils.setField(requestDto,"startDate", "2030-11-10");
         ReflectionTestUtils.setField(requestDto,"endDate", "2023-11-01");
         // When
         when(hallRepository.existsById((any()))).thenReturn(true);
@@ -309,8 +309,8 @@ public class PerformanceAdminServiceTest {
         User user = new User();
         CreatePerformanceRequestDto requestDto = new CreatePerformanceRequestDto(
                 "공연 Test",
-                "2024-11-10",
-                "2024-11-15",
+                "2027-11-10",
+                "2027-11-15",
                 5000L,
                 "CONCERT",
                 "공연 생성 테스트",

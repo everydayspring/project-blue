@@ -2,6 +2,7 @@ package com.sparta.projectblue.domain.reservation.service;
 
 import com.sparta.projectblue.domain.common.dto.AuthUser;
 import com.sparta.projectblue.domain.common.enums.*;
+import com.sparta.projectblue.domain.email.service.EmailCreateService;
 import com.sparta.projectblue.domain.hall.entity.Hall;
 import com.sparta.projectblue.domain.hall.repository.HallRepository;
 import com.sparta.projectblue.domain.payment.entity.Payment;
@@ -19,6 +20,7 @@ import com.sparta.projectblue.domain.round.entity.Round;
 import com.sparta.projectblue.domain.round.repository.RoundRepository;
 import com.sparta.projectblue.domain.user.entity.User;
 import com.sparta.projectblue.domain.user.repository.UserRepository;
+import com.sparta.projectblue.sse.service.NotificationService;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -59,6 +61,11 @@ public class ReservationServiceTest {
     private RoundRepository roundRepository;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private EmailCreateService emailCreateService;
+    @Mock
+    private NotificationService notificationService;
+
 
     @Mock
     private PaymentService paymentService;
@@ -259,6 +266,10 @@ public class ReservationServiceTest {
 
             given(userRepository.findById(anyLong())).willReturn(Optional.of(user));
 
+            Performance performance = new Performance(1L, "Minions", LocalDateTime.now(), LocalDateTime.now(), 156000L, Category.CONCERT, "description", 150);
+
+            given(performanceRepository.findById(anyLong())).willReturn(Optional.of(performance));
+
             given(passwordEncoder.matches(anyString(), anyString())).willReturn(true);
 
             ReservedSeat reservedSeat1 = new ReservedSeat(1L, 1L, 1);
@@ -303,6 +314,11 @@ public class ReservationServiceTest {
 
             given(userRepository.findById(anyLong())).willReturn(Optional.of(user));
 
+
+            Performance performance = new Performance(1L, "Minions", LocalDateTime.now(), LocalDateTime.now(), 156000L, Category.CONCERT, "description", 150);
+
+            given(performanceRepository.findById(anyLong())).willReturn(Optional.of(performance));
+
             given(passwordEncoder.matches(anyString(), anyString())).willReturn(true);
 
             ReservedSeat reservedSeat1 = new ReservedSeat(1L, 1L, 1);
@@ -342,6 +358,11 @@ public class ReservationServiceTest {
 
             given(userRepository.findById(anyLong())).willReturn(Optional.of(user));
 
+
+            Performance performance = new Performance(1L, "Minions", LocalDateTime.now(), LocalDateTime.now(), 156000L, Category.CONCERT, "description", 150);
+
+            given(performanceRepository.findById(anyLong())).willReturn(Optional.of(performance));
+
             // when
             DeleteReservationRequestDto request = new DeleteReservationRequestDto(1L, "abc132?!");
 
@@ -368,6 +389,11 @@ public class ReservationServiceTest {
             ReflectionTestUtils.setField(user, "id", authUser.getId());
 
             given(userRepository.findById(anyLong())).willReturn(Optional.of(user));
+
+
+            Performance performance = new Performance(1L, "Minions", LocalDateTime.now(), LocalDateTime.now(), 156000L, Category.CONCERT, "description", 150);
+
+            given(performanceRepository.findById(anyLong())).willReturn(Optional.of(performance));
 
 
             // when
@@ -397,6 +423,11 @@ public class ReservationServiceTest {
 
             given(userRepository.findById(anyLong())).willReturn(Optional.of(user));
 
+
+            Performance performance = new Performance(1L, "Minions", LocalDateTime.now(), LocalDateTime.now(), 156000L, Category.CONCERT, "description", 150);
+
+            given(performanceRepository.findById(anyLong())).willReturn(Optional.of(performance));
+
             given(passwordEncoder.matches(anyString(), anyString())).willReturn(true);
 
             // when
@@ -425,6 +456,10 @@ public class ReservationServiceTest {
             ReflectionTestUtils.setField(user, "id", authUser.getId());
 
             given(userRepository.findById(anyLong())).willReturn(Optional.of(user));
+
+            Performance performance = new Performance(1L, "Minions", LocalDateTime.now(), LocalDateTime.now(), 156000L, Category.CONCERT, "description", 150);
+
+            given(performanceRepository.findById(anyLong())).willReturn(Optional.of(performance));
 
             given(passwordEncoder.matches(anyString(), anyString())).willReturn(true);
 

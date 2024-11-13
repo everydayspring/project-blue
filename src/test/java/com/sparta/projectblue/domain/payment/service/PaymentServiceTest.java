@@ -5,6 +5,7 @@ import com.sparta.projectblue.domain.common.enums.ReservationStatus;
 import com.sparta.projectblue.domain.common.enums.UserRole;
 import com.sparta.projectblue.domain.common.exception.PaymentException;
 import com.sparta.projectblue.domain.coupon.service.CouponService;
+import com.sparta.projectblue.domain.email.service.EmailCreateService;
 import com.sparta.projectblue.domain.payment.dto.PaymentResponseDto;
 import com.sparta.projectblue.domain.payment.entity.Payment;
 import com.sparta.projectblue.domain.payment.repository.PaymentRepository;
@@ -51,6 +52,8 @@ public class PaymentServiceTest {
     private UserRepository userRepository;
     @Mock
     private CouponService couponService;
+    @Mock
+    private EmailCreateService emailCreateService;
 
     @InjectMocks
     @Spy
