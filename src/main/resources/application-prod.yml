@@ -17,12 +17,22 @@ spring:
         username: ${PROD_MASTER_USERNAME}
         password: ${PROD_MASTER_PASSWORD}
         driver-class-name: com.mysql.cj.jdbc.Driver
+        maximumPoolSize: 15  # 커넥션 풀의 최대 커넥션 개수 설정
+        minimumIdle: 10    # 최소 유휴 커넥션 개수 설정
+        idleTimeout: 30000  # 유휴 커넥션의 유지 시간 (밀리초)
+        maxLifetime: 1800000 # 커넥션의 최대 생명 시간 (밀리초)
+        connectionTimeout: 50000 # 커넥션 풀에서 커넥션을 가져오기 위한 최대 대기 시간 (밀리초)
     slave:
       hikari:
         jdbc-url: ${PROD_SLAVE_JDBC_URL}
         username: ${PROD_SLAVE_USERNAME}
         password: ${PROD_SLAVE_PASSWORD}
         driver-class-name: com.mysql.cj.jdbc.Driver
+        maximumPoolSize: 15  # 커넥션 풀의 최대 커넥션 개수 설정
+        minimumIdle: 10    # 최소 유휴 커넥션 개수 설정
+        idleTimeout: 30000  # 유휴 커넥션의 유지 시간 (밀리초)
+        maxLifetime: 1800000 # 커넥션의 최대 생명 시간 (밀리초)
+        connectionTimeout: 50000 # 커넥션 풀에서 커넥션을 가져오기 위한 최대 대기 시간 (밀리초)
   servlet:
     multipart:
       enabled: true
@@ -96,6 +106,8 @@ logging:
     org.springframework.data.redis: DEBUG
     org.springframework.cache: DEBUG
     root: INFO # 기본 로그 레벨
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
 management:
   endpoint:

@@ -2,5 +2,5 @@ spring:
   application:
     name: project-blue
   profiles:
-    active: local
+    active: prod
 
