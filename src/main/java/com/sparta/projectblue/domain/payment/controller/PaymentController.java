@@ -44,7 +44,7 @@ public class PaymentController {
 
         model.addAttribute("paymentResponse", responseDto);
 
-        return "/checkout";
+        return "checkout";
     }
 
     // 결제 금액이 0원인 경우 TossPayments 사용 불가능
