@@ -1,5 +1,14 @@
 package com.sparta.projectblue.domain.coupon.service;
 
+import java.time.LocalDateTime;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.sparta.projectblue.aop.annotation.CouponLogstash;
 import com.sparta.projectblue.config.DistributedLock;
 import com.sparta.projectblue.domain.common.dto.AuthUser;
 import com.sparta.projectblue.domain.common.enums.CouponStatus;
@@ -7,16 +16,10 @@ import com.sparta.projectblue.domain.common.enums.CouponType;
 import com.sparta.projectblue.domain.coupon.dto.GetCouponResponseDto;
 import com.sparta.projectblue.domain.coupon.entity.Coupon;
 import com.sparta.projectblue.domain.coupon.repository.CouponRepository;
-import com.sparta.projectblue.domain.usedCoupon.entity.UsedCoupon;
-import com.sparta.projectblue.domain.usedCoupon.repository.UsedCouponRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import com.sparta.projectblue.domain.usedcoupon.entity.UsedCoupon;
+import com.sparta.projectblue.domain.usedcoupon.repository.UsedCouponRepository;
 
-import java.time.LocalDateTime;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @Transactional(readOnly = true)
@@ -55,7 +58,7 @@ public class CouponService {
         return new GetCouponResponseDto(coupon);
     }
 
-    public Page<GetCouponResponseDto> getUserCoupon(AuthUser authUser, int page, int size) {
+    public Page<GetCouponResponseDto> getUserCoupon(int page, int size) {
 
         Pageable pageable = PageRequest.of(page - 1, size);
 
@@ -63,6 +66,7 @@ public class CouponService {
     }
 
     @Transactional
+    @CouponLogstash
     public Long useCoupon(Long id, Long originPrice, Long userId, Long reservationId) {
 
         Coupon coupon = couponRepository.findByIdOrElseThrow(id);
@@ -89,7 +93,12 @@ public class CouponService {
         // UsedCoupon DB 저장
         UsedCoupon usedCoupon =
                 new UsedCoupon(
-                        coupon.getId(), userId, reservationId, LocalDateTime.now(), discountAmount, LocalDateTime.now());
+                        coupon.getId(),
+                        userId,
+                        reservationId,
+                        LocalDateTime.now(),
+                        discountAmount,
+                        LocalDateTime.now());
         usedCouponRepository.save(usedCoupon);
 
         return discountAmount;
@@ -97,13 +106,12 @@ public class CouponService {
 
     public void saveUsedCoupon(Long couponId, AuthUser authUser) {
         // 발급된 쿠폰 기록 저장
-        UsedCoupon usedCoupon = new UsedCoupon(
+        new UsedCoupon(
                 couponId,
                 authUser.getId(),
                 null,
                 LocalDateTime.now(),
                 getCoupon(couponId).getDiscountValue(),
-                LocalDateTime.now()
-        );
+                LocalDateTime.now());
     }
 }

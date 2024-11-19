@@ -14,9 +14,8 @@ public class GetHallResponseDto {
     private String address;
     private Integer seats;
 
-     //캐싱을 위한 기본 생성자
-    public GetHallResponseDto() {
-    }
+    // 캐싱을 위한 기본 생성자
+    public GetHallResponseDto() {}
 
     public GetHallResponseDto(Hall hall) {
 

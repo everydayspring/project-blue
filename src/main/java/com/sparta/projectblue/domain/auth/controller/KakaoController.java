@@ -31,8 +31,7 @@ public class KakaoController {
 
     @GetMapping("/kakaoCallback")
     @Operation(summary = "로그인")
-    public ResponseEntity<ApiResponse<String>> kakaoSignin(HttpServletRequest request)
-            throws Exception {
+    public ResponseEntity<ApiResponse<String>> kakaoSignin(HttpServletRequest request) {
 
         return ResponseEntity.ok(
                 ApiResponse.success(kakaoService.callback(request.getParameter("code"))));

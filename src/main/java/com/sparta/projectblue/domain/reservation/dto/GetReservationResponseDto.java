@@ -25,6 +25,7 @@ public class GetReservationResponseDto {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private final LocalDateTime reservationDate; // reservation
+
     private final Long reservationId; // reservation
     private final ReservationStatus reservationStatus; // reservation
 

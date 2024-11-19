@@ -58,7 +58,7 @@ public class User extends BaseEntity {
         this.isDeleted = true;
     }
 
-    public void InsertKakaoId(Long kakaoId) {
+    public void insertKakaoId(Long kakaoId) {
 
         this.kakaoId = kakaoId;
     }

@@ -31,24 +31,23 @@ public class KakaoService {
     private final UserRepository userRepository;
 
     @Value("${KAKAO_CLIENT_ID}")
-    private String client_id;
+    private String clientId;
 
     @Value("${KAKAO_REDIRECT_URI}")
-    private String redirect_uri;
+    private String redirectUri;
 
     public String kakaoLogin() {
 
         return UriComponentsBuilder.fromUriString("https://kauth.kakao.com")
                 .path("/oauth/authorize")
-                .queryParam("client_id", client_id)
-                .queryParam("redirect_uri", redirect_uri)
+                .queryParam("client_id", clientId)
+                .queryParam("redirect_uri", redirectUri)
                 .queryParam("response_type", "code")
                 .build()
                 .toString();
     }
 
-    public String callback(String code) throws Exception {
-
+    public String callback(String code) {
         if (code == null) {
             throw new AuthException("인증코드를 받지 못했습니다.");
         }
@@ -57,13 +56,12 @@ public class KakaoService {
 
         try {
             HttpHeaders headers = new HttpHeaders();
-
             headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
 
             MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
             params.add("grant_type", "authorization_code");
-            params.add("client_id", client_id);
-            params.add("redirect_uri", redirect_uri);
+            params.add("client_id", clientId);
+            params.add("redirect_uri", redirectUri);
             params.add("code", code);
 
             RestTemplate restTemplate = new RestTemplate();
@@ -88,56 +86,57 @@ public class KakaoService {
         return getUserInfo(accessToken);
     }
 
-    private String getUserInfo(String accessToken) throws Exception {
+    private String getUserInfo(String accessToken) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Authorization", "Bearer " + accessToken);
+            headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
 
-        // HttpHeader 생성
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Bearer " + accessToken);
-        headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
+            RestTemplate restTemplate = new RestTemplate();
+            HttpEntity<MultiValueMap<String, String>> httpEntity = new HttpEntity<>(headers);
 
-        // HttpHeader 담기
-        RestTemplate restTemplate = new RestTemplate();
-        HttpEntity<MultiValueMap<String, String>> httpEntity = new HttpEntity<>(headers);
+            ResponseEntity<String> response =
+                    restTemplate.exchange(
+                            "https://kapi.kakao.com/v2/user/me",
+                            HttpMethod.POST,
+                            httpEntity,
+                            String.class);
 
-        ResponseEntity<String> response =
-                restTemplate.exchange(
-                        "https://kapi.kakao.com/v2/user/me",
-                        HttpMethod.POST,
-                        httpEntity,
-                        String.class);
+            JSONParser jsonParser = new JSONParser();
+            JSONObject jsonObject = (JSONObject) jsonParser.parse(response.getBody());
+            JSONObject account = (JSONObject) jsonObject.get("kakao_account");
+            JSONObject profile = (JSONObject) account.get("profile");
 
-        // Response 데이터 파싱
-        JSONParser jsonParser = new JSONParser();
-        JSONObject jsonObject = (JSONObject) jsonParser.parse(response.getBody());
-        JSONObject account = (JSONObject) jsonObject.get("kakao_account");
-        JSONObject profile = (JSONObject) account.get("profile");
+            Long kakaoId = (Long) jsonObject.get("id");
+            String email = String.valueOf(account.get("email"));
+            String nickname = String.valueOf(profile.get("nickname"));
 
-        Long kakaoId = (Long) jsonObject.get("id");
-        String email = String.valueOf(account.get("email"));
-        String nickname = String.valueOf(profile.get("nickname"));
+            User kakaoUser =
+                    userRepository
+                            .findByEmail(email)
+                            .orElseGet(
+                                    () ->
+                                            new User(
+                                                    email,
+                                                    nickname,
+                                                    "kakaoUser",
+                                                    UserRole.ROLE_USER,
+                                                    kakaoId));
 
-        User kakaoUser =
-                userRepository
-                        .findByEmail(email)
-                        .orElseGet(
-                                () ->
-                                        new User(
-                                                email,
-                                                nickname,
-                                                "kakaoUser",
-                                                UserRole.ROLE_USER,
-                                                kakaoId));
+            if (kakaoUser.getKakaoId() == null) {
+                kakaoUser.insertKakaoId(kakaoId);
+            }
 
-        if (kakaoUser.getKakaoId() == null) {
-            kakaoUser.InsertKakaoId(kakaoId);
+            User savedUser = userRepository.save(kakaoUser);
+
+            return jwtUtil.createToken(
+                    savedUser.getId(),
+                    savedUser.getEmail(),
+                    savedUser.getName(),
+                    savedUser.getUserRole());
+
+        } catch (Exception e) {
+            throw new AuthException("사용자 정보 요청 실패");
         }
-
-        User savedUser = userRepository.save(kakaoUser);
-
-        return jwtUtil.createToken(
-                savedUser.getId(),
-                savedUser.getEmail(),
-                savedUser.getName(),
-                savedUser.getUserRole());
     }
 }

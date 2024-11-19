@@ -2,8 +2,6 @@ package com.sparta.projectblue.domain.performer.dto;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.sparta.projectblue.domain.performer.entity.Performer;
 
@@ -16,8 +14,7 @@ public class GetPerformersResponseDto {
     private List<PerformerInfo> performers;
 
     // 기본 생성자 추가
-    public GetPerformersResponseDto() {
-    }
+    public GetPerformersResponseDto() {}
 
     public GetPerformersResponseDto(List<PerformerInfo> performers) {
         this.performers = performers;
@@ -30,8 +27,7 @@ public class GetPerformersResponseDto {
         private String birth;
 
         // 기본 생성자 추가
-        public PerformerInfo() {
-        }
+        public PerformerInfo() {}
 
         public PerformerInfo(Performer performer) {
             this.name = performer.getName();

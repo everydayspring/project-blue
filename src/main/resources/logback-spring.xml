@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration scan="true" scanPeriod="30 seconds">
+    <property resource="application.properties"/>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 로컬 파일에 로그 저장 설정 -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern> ${LOGSTASH_FILE_PATH} </fileNamePattern>
+            <maxHistory>14</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%date %level [%thread] %logger{10} [%file:%line] %msg%n%xThrowable{5}</pattern>
+        </encoder>
+    </appender>
+
+    <!--  logstash setting  -->
+    <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination> ${LOGSTASH_DESTINATION} </destination>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
+    </appender>
+
+    <!-- 예약 관련 로그를 Logstash로 전송 -->
+    <!--  additivity를 false로 하면 해당 name에 해당하는 패키지의 로그가 root로 전파되지 않음. 즉, 콘솔에 안나옴  -->
+    <!--  false로 해놓고 콘솔에도 출력하고 싶으면 appender-ref ref="CONSOLE" 추가해주면 됨 -->
+    <logger name="com.sparta.projectblue.aop.LogstashAspect" level="DEBUG">
+        <appender-ref ref="LOGSTASH" />
+        <appender-ref ref="CONSOLE" />
+    </logger>
+
+    <logger name="org.hibernate.SQL" level="DEBUG" additivity="false">
+        <appender-ref ref="LOGSTASH" />
+    </logger>
+
+    <!-- 전체 애플리케이션 로깅 설정 -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />  <!-- INFO레벨 이상 로그를 CONSOLE에 출력 -->
+        <appender-ref ref="FILE" />  <!-- INFO레벨 이상 로그를 File에 기록 -->
+    </root>
+</configuration>

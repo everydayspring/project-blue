@@ -1,5 +1,8 @@
 package com.sparta.projectblue.domain.hall.service;
 
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.sparta.projectblue.domain.common.dto.AuthUser;
 import com.sparta.projectblue.domain.common.enums.UserRole;
 import com.sparta.projectblue.domain.hall.dto.CreateHallRequestDto;
@@ -8,9 +11,8 @@ import com.sparta.projectblue.domain.hall.dto.UpdateHallRequestDto;
 import com.sparta.projectblue.domain.hall.dto.UpdateHallResponseDto;
 import com.sparta.projectblue.domain.hall.entity.Hall;
 import com.sparta.projectblue.domain.hall.repository.HallRepository;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor

@@ -1,5 +1,21 @@
 package com.sparta.projectblue.domain.round.service;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
+
 import com.sparta.projectblue.domain.common.dto.AuthUser;
 import com.sparta.projectblue.domain.common.enums.PerformanceStatus;
 import com.sparta.projectblue.domain.common.enums.UserRole;
@@ -13,37 +29,17 @@ import com.sparta.projectblue.domain.round.entity.Round;
 import com.sparta.projectblue.domain.round.repository.RoundRepository;
 import com.sparta.projectblue.domain.user.entity.User;
 import com.sparta.projectblue.domain.user.repository.UserRepository;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
-
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class RoundAdminServiceTest {
+class RoundAdminServiceTest {
 
-    @Mock
-    private RoundRepository roundRepository;
+    @Mock private RoundRepository roundRepository;
 
-    @Mock
-    private PerformanceRepository performanceRepository;
+    @Mock private PerformanceRepository performanceRepository;
 
-    @Mock
-    private UserRepository userRepository;
+    @Mock private UserRepository userRepository;
 
-    @InjectMocks
-    private RoundAdminService roundAdminService;
+    @InjectMocks private RoundAdminService roundAdminService;
 
     @Test
     void 유효한_요청으로_회차를_정상_생성하는_테스트() {
@@ -51,7 +47,8 @@ public class RoundAdminServiceTest {
         AuthUser authUser = new AuthUser(1L, "admin@example.com", "Admin", UserRole.ROLE_ADMIN);
         Long performanceId = 1L;
         LocalDateTime futureDate = LocalDateTime.now().plusDays(1);
-        CreateRoundRequestDto request = new CreateRoundRequestDto(performanceId, Collections.singletonList(futureDate));
+        CreateRoundRequestDto request =
+                new CreateRoundRequestDto(performanceId, Collections.singletonList(futureDate));
         Performance performance = new Performance();
 
         Round round = new Round(performanceId, futureDate, PerformanceStatus.BEFORE_OPEN);
@@ -66,7 +63,8 @@ public class RoundAdminServiceTest {
         when(roundRepository.saveAll(any())).thenReturn(List.of(round));
 
         // when
-        List<CreateRoundResponseDto> response = roundAdminService.create(authUser, performanceId, request);
+        List<CreateRoundResponseDto> response =
+                roundAdminService.create(authUser, performanceId, request);
 
         // then
         assertNotNull(response);
@@ -75,14 +73,6 @@ public class RoundAdminServiceTest {
         assertEquals(performanceId, response.get(0).getPerformanceId());
         assertEquals(futureDate, response.get(0).getDate());
         assertEquals(PerformanceStatus.BEFORE_OPEN, response.get(0).getStatus());
-
-        System.out.println("생성된 회차 리스트:");
-        response.forEach(roundDto -> {
-            System.out.println("회차 ID: " + roundDto.getId());
-            System.out.println("공연 ID: " + roundDto.getPerformanceId());
-            System.out.println("날짜: " + roundDto.getDate());
-            System.out.println("상태: " + roundDto.getStatus());
-        });
     }
 
     @Test
@@ -91,7 +81,8 @@ public class RoundAdminServiceTest {
         AuthUser authUser = new AuthUser(1L, "admin@example.com", "Admin", UserRole.ROLE_ADMIN);
         Long performanceId = 1L;
         LocalDateTime futureDate = LocalDateTime.now().plusDays(1);
-        CreateRoundRequestDto request = new CreateRoundRequestDto(performanceId, Collections.singletonList(futureDate));
+        CreateRoundRequestDto request =
+                new CreateRoundRequestDto(performanceId, Collections.singletonList(futureDate));
 
         // Mock User 설정
         User adminUser = new User();
@@ -102,8 +93,10 @@ public class RoundAdminServiceTest {
         when(performanceRepository.findById(performanceId)).thenReturn(Optional.empty());
 
         // when & then
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> roundAdminService.create(authUser, performanceId, request));
-        System.out.println("예외 메시지: " + exception.getMessage());
+        IllegalArgumentException exception =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> roundAdminService.create(authUser, performanceId, request));
         assertEquals("공연을 찾을 수 없습니다", exception.getMessage());
     }
 
@@ -121,13 +114,17 @@ public class RoundAdminServiceTest {
 
         Long performanceId = 1L;
         LocalDateTime pastDate = LocalDateTime.now().minusDays(1);
-        CreateRoundRequestDto request = new CreateRoundRequestDto(performanceId, Collections.singletonList(pastDate));
+        CreateRoundRequestDto request =
+                new CreateRoundRequestDto(performanceId, Collections.singletonList(pastDate));
 
-        when(performanceRepository.findById(performanceId)).thenReturn(Optional.of(new Performance()));
+        when(performanceRepository.findById(performanceId))
+                .thenReturn(Optional.of(new Performance()));
 
         // when & then
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> roundAdminService.create(authUser, performanceId, request));
-        System.out.println("예외 메시지: " + exception.getMessage());
+        IllegalArgumentException exception =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> roundAdminService.create(authUser, performanceId, request));
         assertEquals("과거의 날짜로 회차를 생성할 수 없습니다.", exception.getMessage());
     }
 
@@ -149,8 +146,10 @@ public class RoundAdminServiceTest {
         when(roundRepository.findById(roundId)).thenReturn(Optional.empty());
 
         // when & then
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> roundAdminService.update(authUser, roundId, request));
-        System.out.println("예외 메시지: " + exception.getMessage());
+        IllegalArgumentException exception =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> roundAdminService.update(authUser, roundId, request));
         assertEquals("회차를 찾을 수 없습니다.", exception.getMessage());
     }
 
@@ -160,7 +159,8 @@ public class RoundAdminServiceTest {
         AuthUser authUser = new AuthUser(1L, "admin@example.com", "Admin", UserRole.ROLE_ADMIN);
         Long roundId = 1L;
         LocalDateTime pastDate = LocalDateTime.now().minusDays(1);
-        Round existingRound = new Round(1L, LocalDateTime.now().plusDays(1), PerformanceStatus.BEFORE_OPEN);
+        Round existingRound =
+                new Round(1L, LocalDateTime.now().plusDays(1), PerformanceStatus.BEFORE_OPEN);
 
         User adminUser = new User();
         ReflectionTestUtils.setField(adminUser, "id", authUser.getId());
@@ -169,11 +169,14 @@ public class RoundAdminServiceTest {
         when(userRepository.findById(authUser.getId())).thenReturn(Optional.of(adminUser));
 
         when(roundRepository.findById(roundId)).thenReturn(Optional.of(existingRound));
-        UpdateRoundRequestDto request = new UpdateRoundRequestDto(pastDate, PerformanceStatus.AVAILABLE);
+        UpdateRoundRequestDto request =
+                new UpdateRoundRequestDto(pastDate, PerformanceStatus.AVAILABLE);
 
         // when & then
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> roundAdminService.update(authUser, roundId, request));
-        System.out.println("예외 메시지: " + exception.getMessage());
+        IllegalArgumentException exception =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> roundAdminService.update(authUser, roundId, request));
         assertEquals("과거의 날짜로 회차를 수정할 수 없습니다.", exception.getMessage());
     }
 
@@ -183,7 +186,8 @@ public class RoundAdminServiceTest {
         AuthUser authUser = new AuthUser(1L, "admin@example.com", "Admin", UserRole.ROLE_ADMIN);
         Long roundId = 1L;
         LocalDateTime newDate = LocalDateTime.now().plusDays(3);
-        Round existingRound = new Round(1L, LocalDateTime.now().plusDays(1), PerformanceStatus.BEFORE_OPEN);
+        Round existingRound =
+                new Round(1L, LocalDateTime.now().plusDays(1), PerformanceStatus.BEFORE_OPEN);
 
         User adminUser = new User();
         ReflectionTestUtils.setField(adminUser, "id", authUser.getId());
@@ -199,7 +203,6 @@ public class RoundAdminServiceTest {
         // then
         assertEquals(newDate, response.getDate());
         assertEquals(existingRound.getStatus(), response.getStatus());
-        System.out.println("date만 제공된 경우 업데이트 완료. 새로운 날짜: " + response.getDate());
     }
 
     @Test
@@ -208,7 +211,8 @@ public class RoundAdminServiceTest {
         AuthUser authUser = new AuthUser(1L, "admin@example.com", "Admin", UserRole.ROLE_ADMIN);
         Long roundId = 1L;
         PerformanceStatus newStatus = PerformanceStatus.AVAILABLE;
-        Round existingRound = new Round(1L, LocalDateTime.now().plusDays(1), PerformanceStatus.BEFORE_OPEN);
+        Round existingRound =
+                new Round(1L, LocalDateTime.now().plusDays(1), PerformanceStatus.BEFORE_OPEN);
 
         User adminUser = new User();
         ReflectionTestUtils.setField(adminUser, "id", authUser.getId());
@@ -224,7 +228,6 @@ public class RoundAdminServiceTest {
         // then
         assertEquals(existingRound.getDate(), response.getDate());
         assertEquals(newStatus, response.getStatus());
-        System.out.println("status만 제공된 경우 업데이트 완료. 새로운 상태: " + response.getStatus());
     }
 
     @Test
@@ -234,7 +237,8 @@ public class RoundAdminServiceTest {
         Long roundId = 1L;
         LocalDateTime newDate = LocalDateTime.now().plusDays(3);
         PerformanceStatus newStatus = PerformanceStatus.AVAILABLE;
-        Round existingRound = new Round(1L, LocalDateTime.now().plusDays(1), PerformanceStatus.BEFORE_OPEN);
+        Round existingRound =
+                new Round(1L, LocalDateTime.now().plusDays(1), PerformanceStatus.BEFORE_OPEN);
 
         User adminUser = new User();
         ReflectionTestUtils.setField(adminUser, "id", authUser.getId());
@@ -250,9 +254,6 @@ public class RoundAdminServiceTest {
         // then
         assertEquals(newDate, response.getDate());
         assertEquals(newStatus, response.getStatus());
-        System.out.println("date와 status 모두 제공된 경우 업데이트 완료.");
-        System.out.println("새로운 날짜: " + response.getDate());
-        System.out.println("새로운 상태: " + response.getStatus());
     }
 
     @Test
@@ -260,7 +261,8 @@ public class RoundAdminServiceTest {
         // given
         AuthUser authUser = new AuthUser(1L, "admin@example.com", "Admin", UserRole.ROLE_ADMIN);
         Long roundId = 1L;
-        Round existingRound = new Round(1L, LocalDateTime.now().plusDays(1), PerformanceStatus.BEFORE_OPEN);
+        Round existingRound =
+                new Round(1L, LocalDateTime.now().plusDays(1), PerformanceStatus.BEFORE_OPEN);
 
         User adminUser = new User();
         ReflectionTestUtils.setField(adminUser, "id", authUser.getId());
@@ -276,7 +278,6 @@ public class RoundAdminServiceTest {
         // then
         assertEquals(existingRound.getDate(), response.getDate());
         assertEquals(existingRound.getStatus(), response.getStatus());
-        System.out.println("date와 status가 null인 경우 기존값 유지 확인.");
     }
 
     @Test
@@ -291,8 +292,10 @@ public class RoundAdminServiceTest {
         when(roundRepository.findById(roundId)).thenReturn(Optional.empty());
 
         // when & then
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> roundAdminService.delete(authUser, roundId));
-        System.out.println("예외 메시지: " + exception.getMessage());
+        IllegalArgumentException exception =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> roundAdminService.delete(authUser, roundId));
         assertEquals("회차를 찾을 수 없습니다.", exception.getMessage());
     }
 
@@ -304,7 +307,8 @@ public class RoundAdminServiceTest {
         ReflectionTestUtils.setField(adminUser, "id", authUser.getId());
         ReflectionTestUtils.setField(adminUser, "userRole", UserRole.ROLE_ADMIN);
         Long roundId = 1L;
-        Round existingRound = new Round(roundId, LocalDateTime.now().plusDays(1), PerformanceStatus.BEFORE_OPEN);
+        Round existingRound =
+                new Round(roundId, LocalDateTime.now().plusDays(1), PerformanceStatus.BEFORE_OPEN);
 
         when(userRepository.findById(authUser.getId())).thenReturn(Optional.of(adminUser));
         when(roundRepository.findById(roundId)).thenReturn(Optional.of(existingRound));
@@ -313,7 +317,7 @@ public class RoundAdminServiceTest {
         roundAdminService.delete(authUser, roundId);
 
         // then
-        System.out.println("회차 삭제 완료, ID: " + roundId);
+        verify(roundRepository, times(1)).delete(existingRound);
     }
 
     @Test
@@ -329,10 +333,11 @@ public class RoundAdminServiceTest {
         when(userRepository.findById(authUser.getId())).thenReturn(Optional.of(adminUser));
         when(performanceRepository.findById(1L)).thenReturn(Optional.of(new Performance()));
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> roundAdminService.create(authUser, 1L, request));
+        IllegalArgumentException exception =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> roundAdminService.create(authUser, 1L, request));
         assertEquals("요청 내 날짜들이 중복될 수 없습니다.", exception.getMessage());
-        System.out.println("예외 메시지: " + exception.getMessage());
     }
 
     @Test
@@ -354,17 +359,20 @@ public class RoundAdminServiceTest {
         CreateRoundRequestDto request = new CreateRoundRequestDto(performanceId, List.of(newDate));
 
         when(userRepository.findById(authUser.getId())).thenReturn(Optional.of(adminUser));
-        when(performanceRepository.findById(performanceId)).thenReturn(Optional.of(new Performance()));
+        when(performanceRepository.findById(performanceId))
+                .thenReturn(Optional.of(new Performance()));
         when(roundRepository.findByPerformanceId(performanceId)).thenReturn(List.of(existingRound));
-        when(roundRepository.saveAll(any())).thenReturn(List.of(new Round(performanceId, newDate, PerformanceStatus.BEFORE_OPEN)));
+        when(roundRepository.saveAll(any()))
+                .thenReturn(
+                        List.of(new Round(performanceId, newDate, PerformanceStatus.BEFORE_OPEN)));
 
         // when
-        List<CreateRoundResponseDto> response = roundAdminService.create(authUser, performanceId, request);
+        List<CreateRoundResponseDto> response =
+                roundAdminService.create(authUser, performanceId, request);
 
         // then
         assertEquals(1, response.size());
         assertEquals(newDate, response.get(0).getDate());
-        System.out.println("정상적으로 회차 생성 완료. 생성된 회차 날짜: " + response.get(0).getDate());
     }
 
     @Test
@@ -386,17 +394,15 @@ public class RoundAdminServiceTest {
         CreateRoundRequestDto request = new CreateRoundRequestDto(performanceId, List.of(newDate));
 
         when(userRepository.findById(authUser.getId())).thenReturn(Optional.of(adminUser));
-        when(performanceRepository.findById(performanceId)).thenReturn(Optional.of(new Performance()));
+        when(performanceRepository.findById(performanceId))
+                .thenReturn(Optional.of(new Performance()));
         when(roundRepository.findByPerformanceId(performanceId)).thenReturn(List.of(existingRound));
 
         // when & then
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> roundAdminService.create(authUser, performanceId, request));
-        System.out.println("예외 메시지: " + exception.getMessage());
+        IllegalArgumentException exception =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> roundAdminService.create(authUser, performanceId, request));
         assertEquals("기존 회차와 1시간 이상 차이가 나야 합니다.", exception.getMessage());
     }
-
-
 }
-
-

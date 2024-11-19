@@ -16,6 +16,7 @@ public class CreateRoundResponseDto {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private final LocalDateTime date;
+
     private final PerformanceStatus status;
 
     public CreateRoundResponseDto(Round round) {

@@ -6,6 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sparta.projectblue.aop.annotation.CouponLogstash;
 import com.sparta.projectblue.config.JwtUtil;
 import com.sparta.projectblue.domain.auth.dto.SigninRequestDto;
 import com.sparta.projectblue.domain.auth.dto.SigninResponseDto;
@@ -17,7 +18,6 @@ import com.sparta.projectblue.domain.common.enums.UserRole;
 import com.sparta.projectblue.domain.common.exception.AuthException;
 import com.sparta.projectblue.domain.coupon.entity.Coupon;
 import com.sparta.projectblue.domain.coupon.repository.CouponRepository;
-import com.sparta.projectblue.domain.usedCoupon.repository.UsedCouponRepository;
 import com.sparta.projectblue.domain.user.entity.User;
 import com.sparta.projectblue.domain.user.repository.UserRepository;
 
@@ -59,7 +59,7 @@ public class AuthService {
                 jwtUtil.createToken(
                         savedUser.getId(), savedUser.getEmail(), savedUser.getName(), userRole);
 
-        Coupon coupon = signupCoupon(savedUser.getId()); // 쿠폰 생성
+        Coupon coupon = signupCoupon(); // 쿠폰 생성
 
         return new SignupResponseDto(bearerToken, coupon); // 응답시 쿠폰 정보 포함
     }
@@ -99,7 +99,8 @@ public class AuthService {
     }
 
     // 쿠폰 생성 메서드
-    private Coupon signupCoupon(Long userId) {
+    @CouponLogstash
+    private Coupon signupCoupon() {
 
         Coupon coupon =
                 new Coupon(

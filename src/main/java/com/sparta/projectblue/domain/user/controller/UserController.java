@@ -28,7 +28,7 @@ public class UserController {
 
     @DeleteMapping
     @Operation(summary = "탈퇴")
-    public ResponseEntity<ApiResponse<?>> delete(
+    public ResponseEntity<ApiResponse<Void>> delete(
             @AuthenticationPrincipal AuthUser authUser,
             @Valid @RequestBody DeleteUserRequestDto request) {
 

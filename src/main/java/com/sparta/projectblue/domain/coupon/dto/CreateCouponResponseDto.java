@@ -1,11 +1,12 @@
 package com.sparta.projectblue.domain.coupon.dto;
 
+import java.time.LocalDateTime;
+
 import com.sparta.projectblue.domain.common.enums.CouponStatus;
 import com.sparta.projectblue.domain.common.enums.CouponType;
 import com.sparta.projectblue.domain.coupon.entity.Coupon;
-import lombok.Getter;
 
-import java.time.LocalDateTime;
+import lombok.Getter;
 
 @Getter
 public class CreateCouponResponseDto {

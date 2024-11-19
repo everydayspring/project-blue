@@ -4,9 +4,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.sparta.projectblue.domain.performer.entity.Performer;
-import lombok.Getter;
 
-import java.time.LocalDateTime;
+import lombok.Getter;
 
 @Getter
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
@@ -17,7 +16,8 @@ public class GetPerformerResponseDto {
     private String birth;
 
     // 기본 생성자 추가
-    public GetPerformerResponseDto(){}
+    public GetPerformerResponseDto() {}
+
     @JsonCreator
     public GetPerformerResponseDto(
             @JsonProperty("name") String name,

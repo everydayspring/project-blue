@@ -45,5 +45,5 @@ public class GetPerformanceResponseDto {
         this.imageUrl = poster.getImageUrl();
     }
 
-    public GetPerformanceResponseDto(){}
+    public GetPerformanceResponseDto() {}
 }

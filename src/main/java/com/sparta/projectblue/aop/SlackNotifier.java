@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Component
 public class SlackNotifier {
 
@@ -27,7 +30,7 @@ public class SlackNotifier {
         try {
             restTemplate.postForObject(slackWebhookUrl, payload, String.class);
         } catch (Exception e) {
-            System.out.println("slack 알림 전송 오류");
+            log.error("Slack 알림 전송 오류: {}", e.getMessage(), e);
         }
     }
 }

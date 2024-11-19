@@ -3,7 +3,7 @@ package com.sparta.projectblue.domain.performance.repository;
 import static com.sparta.projectblue.domain.hall.entity.QHall.hall;
 import static com.sparta.projectblue.domain.performance.entity.QPerformance.performance;
 import static com.sparta.projectblue.domain.performer.entity.QPerformer.performer;
-import static com.sparta.projectblue.domain.performerPerformance.entity.QPerformerPerformance.performerPerformance;
+import static com.sparta.projectblue.domain.performerperformance.entity.QPerformerPerformance.performerPerformance;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,6 +28,44 @@ public class PerformanceQueryRepositoryImpl implements PerformanceQueryRepositor
 
     private final JPAQueryFactory jpaQueryFactory;
 
+    private static final String START = "startDate";
+    private static final String END = "endDate";
+
+    @Override
+    public Page<GetPerformancesResponseDto> findAllPerformance(Pageable pageable) {
+
+        List<GetPerformancesResponseDto> query =
+                jpaQueryFactory
+                        .select(
+                                Projections.fields(
+                                        GetPerformancesResponseDto.class,
+                                        performance.title.as("title"),
+                                        hall.name.as("hallNm"),
+                                        performance.startDate.as(START),
+                                        performance.endDate.as(END)))
+                        .from(performance)
+                        .leftJoin(hall)
+                        .on(performance.hallId.eq(hall.id))
+                        .where(performanceBetweenIn(LocalDateTime.now()))
+                        .orderBy(performance.startDate.asc())
+                        .offset(pageable.getOffset())
+                        .limit(pageable.getPageSize())
+                        .fetch();
+
+        Long total =
+                jpaQueryFactory
+                        .select(performance.count())
+                        .from(performance)
+                        .leftJoin(hall)
+                        .on(performance.hallId.eq(hall.id))
+                        .where(performanceBetweenIn(LocalDateTime.now()))
+                        .fetchOne();
+
+        if (total == null) total = 0L;
+
+        return new PageImpl<>(query, pageable, total);
+    }
+
     @Override
     public Page<GetPerformancesResponseDto> findByCondition(
             Pageable pageable,
@@ -42,8 +80,8 @@ public class PerformanceQueryRepositoryImpl implements PerformanceQueryRepositor
                                         GetPerformancesResponseDto.class,
                                         performance.title.as("title"),
                                         hall.name.as("hallNm"),
-                                        performance.startDate.as("startDate"),
-                                        performance.endDate.as("endDate")))
+                                        performance.startDate.as(START),
+                                        performance.endDate.as(END)))
                         .from(performance)
                         .leftJoin(hall)
                         .on(performance.hallId.eq(hall.id))
@@ -133,8 +171,8 @@ public class PerformanceQueryRepositoryImpl implements PerformanceQueryRepositor
                                         performance.id.as("performanceId"),
                                         hall.id.as("hallId"),
                                         performance.title.as("performanceTitle"),
-                                        performance.startDate.as("startDate"),
-                                        performance.endDate.as("endDate"),
+                                        performance.startDate.as(START),
+                                        performance.endDate.as(END),
                                         performance.price.as("price"),
                                         performance.category.stringValue().as("category"),
                                         performance.description.as("description"),

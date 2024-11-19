@@ -12,6 +12,8 @@ import com.sparta.projectblue.domain.search.document.SearchDocument;
 
 public interface PerformanceQueryRepository {
 
+    Page<GetPerformancesResponseDto> findAllPerformance(Pageable pageable);
+
     Page<GetPerformancesResponseDto> findByCondition(
             Pageable pageable,
             String performanceNm,

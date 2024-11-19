@@ -1,7 +1,18 @@
 package com.sparta.projectblue.domain.reservation.service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.sparta.projectblue.aop.annotation.ReservationLogstash;
 import com.sparta.projectblue.domain.common.dto.AuthUser;
-import com.sparta.projectblue.domain.common.enums.PaymentStatus;
 import com.sparta.projectblue.domain.common.enums.PerformanceStatus;
 import com.sparta.projectblue.domain.common.enums.ReservationStatus;
 import com.sparta.projectblue.domain.email.service.EmailCreateService;
@@ -9,31 +20,23 @@ import com.sparta.projectblue.domain.hall.entity.Hall;
 import com.sparta.projectblue.domain.hall.repository.HallRepository;
 import com.sparta.projectblue.domain.payment.entity.Payment;
 import com.sparta.projectblue.domain.payment.repository.PaymentRepository;
-import com.sparta.projectblue.domain.payment.service.PaymentService;
 import com.sparta.projectblue.domain.performance.entity.Performance;
 import com.sparta.projectblue.domain.performance.repository.PerformanceRepository;
 import com.sparta.projectblue.domain.reservation.dto.*;
 import com.sparta.projectblue.domain.reservation.entity.Reservation;
 import com.sparta.projectblue.domain.reservation.repository.ReservationRepository;
-import com.sparta.projectblue.domain.reservedSeat.entity.ReservedSeat;
-import com.sparta.projectblue.domain.reservedSeat.repository.ReservedSeatRepository;
+import com.sparta.projectblue.domain.reservedseat.entity.ReservedSeat;
+import com.sparta.projectblue.domain.reservedseat.repository.ReservedSeatRepository;
 import com.sparta.projectblue.domain.review.entity.Review;
 import com.sparta.projectblue.domain.review.repository.ReviewRepository;
 import com.sparta.projectblue.domain.round.entity.Round;
 import com.sparta.projectblue.domain.round.repository.RoundRepository;
+import com.sparta.projectblue.domain.sse.service.NotificationService;
 import com.sparta.projectblue.domain.user.entity.User;
 import com.sparta.projectblue.domain.user.repository.UserRepository;
-import com.sparta.projectblue.sse.service.NotificationService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -53,12 +56,13 @@ public class ReservationService {
     private final EmailCreateService emailCreateService;
     private final NotificationService notificationService;
 
-    private final PaymentService paymentService;
+    private final ReservationAsyncService reservationAsyncService;
 
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-//    @DistributedLock(key = "#reservationId")
+    //    @DistributedLock(key = "#reservationId")
+    @ReservationLogstash
     public CreateReservationResponseDto create(Long id, CreateReservationRequestDto request) {
 
         // 회차 가져옴 (예매상태확인)
@@ -123,7 +127,6 @@ public class ReservationService {
 
         reservationRepository.save(newReservation);
 
-
         for (Integer i : request.getSeats()) {
             reservedSeatRepository.save(
                     new ReservedSeat(newReservation.getId(), newReservation.getRoundId(), i));
@@ -138,17 +141,23 @@ public class ReservationService {
                         newReservation.getPrice(),
                         ReservationStatus.PENDING);
 
-
         emailCreateService.sendReservationEmail(id, responseDto);
 
         // 예매 성공 알림 (SSE 전송)
         String title = "[티켓 예매 완료]";
-        String message = String.format(
-                "%s 고객님, 예매가 완료되었습니다.\n" +
-                        "상품정보: %s 공연, %s 회차, %s 공연장, %s 좌석\n" +
-                        "일시: %s로 예약되었습니다.",
-                id, performance.getTitle(), request.getRoundId(), hall.getName(), request.getSeats(),
-                round.getDate());
+        String message =
+                String.format(
+                        """
+                        %s 고객님, 예매가 완료되었습니다.
+                        상품정보: %s 공연, %s 회차, %s 공연장, %s 좌석
+                        일시: %s로 예약되었습니다.
+                        """,
+                        id,
+                        performance.getTitle(),
+                        request.getRoundId(),
+                        hall.getName(),
+                        request.getSeats(),
+                        round.getDate());
 
         notificationService.notify(String.valueOf(id), title, message);
 
@@ -156,67 +165,34 @@ public class ReservationService {
     }
 
     @Transactional
+    @ReservationLogstash
     public void delete(Long id, DeleteReservationRequestDto request) throws Exception {
-
-        // 예매내역이 있는지 확인
         Reservation reservation =
                 reservationRepository
                         .findById(request.getReservationId())
                         .orElseThrow(() -> new IllegalArgumentException("reservation not found"));
-
-        // 사용자 가져옴
         User user =
                 userRepository
                         .findById(id)
                         .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        // 공연 정보 조회
-        Performance performance =
-                performanceRepository
-                        .findById(reservation.getPerformanceId())
-                        .orElseThrow(() -> new IllegalArgumentException("performance not found"));
-
-        if(!reservation.getUserId().equals(user.getId())) {
+        if (!reservation.getUserId().equals(user.getId())) {
             throw new IllegalArgumentException("예매자가 아닙니다");
         }
 
-        // 계정 비밀번호 확인
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new IllegalArgumentException("Incorrect password");
         }
 
-        // 이미 취소 되었는지 확인
-        if (reservation.getStatus().equals(ReservationStatus.CANCELED)) {
-            throw new IllegalArgumentException("Reservation already cancelled.");
-        }
-
-        List<ReservedSeat> reservedSeats =
-                reservedSeatRepository.findByReservationId(reservation.getId());
-
-        if (reservedSeats.isEmpty()) {
-            throw new IllegalArgumentException("ReservedSeat does not exist");
-        }
-
-        reservedSeatRepository.deleteAll(reservedSeats);
+        reservationAsyncService.deleteReservationSeats(reservation.getId());
 
         if (Objects.nonNull(reservation.getPaymentId())) {
-            Payment payment =
-                    paymentRepository
-                            .findById(reservation.getPaymentId())
-                            .orElseThrow(() -> new IllegalArgumentException("payment not found"));
-
-            if(! payment.getStatus().equals(PaymentStatus.CANCELED)) {
-                paymentService.cancelPayment(payment.getPaymentKey(), "예매를 취소합니다");
-            }
+            reservationAsyncService.deleteReservationPayment(reservation.getPaymentId());
         }
 
-        String title = "[티켓_예매취소완료]";
-            String message =
-                    String.format(
-                            "%s 고객님, %s 공연의 예약이 취소 되었습니다.", user.getName(), performance.getTitle());
-            notificationService.notify(user.getName(), title, message);
-
-            reservation.resCanceled();
+        reservation.resCanceled();
+        reservationAsyncService.deleteReservationSlack(
+                user.getName(), reservation.getPerformanceId());
     }
 
     public GetReservationResponseDto getReservation(AuthUser user, Long reservationId) {
@@ -247,10 +223,10 @@ public class ReservationService {
             throw new IllegalArgumentException("ReservedSeat does not exist");
         }
 
-        List<Integer> seats =
-                reservedSeats.stream()
-                        .map(ReservedSeat::getSeatNumber)
-                        .collect(Collectors.toList());
+        List<Integer> seats = new ArrayList<>();
+        for (ReservedSeat reservedSeat : reservedSeats) {
+            seats.add(reservedSeat.getSeatNumber());
+        }
 
         Payment payment = null;
         if (Objects.nonNull(reservation.getPaymentId())) {
@@ -266,14 +242,19 @@ public class ReservationService {
                 performance, round.getDate(), reservation, user.getName(), seats, payment, review);
     }
 
-    public List<GetReservationsResponseDto> getReservations(Long userId) {
+    public Page<GetReservationsResponseDto> getReservations(Long userId, int page, int size) {
 
-        // 예약 가져옴
-        List<Reservation> reservations = reservationRepository.findByUserId(userId);
+        // 페이지 요청 설정
+        PageRequest pageRequest = PageRequest.of(page, size);
 
+        // 예약 가져오기
+        Page<Reservation> reservationsPage =
+                reservationRepository.findByUserId(userId, pageRequest);
+
+        // DTO 리스트 생성
         List<GetReservationsResponseDto> responseList = new ArrayList<>();
 
-        for (Reservation reservation : reservations) {
+        for (Reservation reservation : reservationsPage) {
             Performance performance =
                     performanceRepository
                             .findById(reservation.getPerformanceId())
@@ -306,6 +287,7 @@ public class ReservationService {
                             reservation.getStatus()));
         }
 
-        return responseList;
+        // 페이지 변환 후 반환
+        return new PageImpl<>(responseList, pageRequest, reservationsPage.getTotalElements());
     }
 }

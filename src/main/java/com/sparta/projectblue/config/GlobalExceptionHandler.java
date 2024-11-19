@@ -13,7 +13,7 @@ import com.sparta.projectblue.domain.common.exception.PaymentException;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ApiResponse<?>> handleInvalidRequestException(
+    public ResponseEntity<ApiResponse<Void>> handleInvalidRequestException(
             IllegalArgumentException ex) {
 
         HttpStatus status = HttpStatus.BAD_REQUEST;
@@ -22,7 +22,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(AuthException.class)
-    public ResponseEntity<ApiResponse<?>> handleAuthException(AuthException ex) {
+    public ResponseEntity<ApiResponse<Void>> handleAuthException(AuthException ex) {
 
         HttpStatus status = HttpStatus.UNAUTHORIZED;
 
@@ -30,14 +30,14 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(PaymentException.class)
-    public ResponseEntity<ApiResponse<?>> handlePaymentException(AuthException ex) {
+    public ResponseEntity<ApiResponse<Void>> handlePaymentException(AuthException ex) {
 
         HttpStatus status = HttpStatus.PAYMENT_REQUIRED;
 
         return getErrorResponse(status, ex.getMessage());
     }
 
-    public ResponseEntity<ApiResponse<?>> getErrorResponse(HttpStatus status, String message) {
+    public ResponseEntity<ApiResponse<Void>> getErrorResponse(HttpStatus status, String message) {
 
         return ResponseEntity.status(status).body(ApiResponse.error("오류가 발생했습니다." + message));
     }

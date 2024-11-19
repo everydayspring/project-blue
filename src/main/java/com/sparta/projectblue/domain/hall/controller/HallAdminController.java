@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.*;
 import com.sparta.projectblue.config.ApiResponse;
 import com.sparta.projectblue.domain.common.dto.AuthUser;
 import com.sparta.projectblue.domain.hall.dto.CreateHallRequestDto;
+import com.sparta.projectblue.domain.hall.dto.CreateHallResponseDto;
 import com.sparta.projectblue.domain.hall.dto.UpdateHallRequestDto;
+import com.sparta.projectblue.domain.hall.dto.UpdateHallResponseDto;
 import com.sparta.projectblue.domain.hall.service.HallAdminService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,7 +28,7 @@ public class HallAdminController {
 
     @PostMapping
     @Operation(summary = "공연장 등록")
-    public ResponseEntity<ApiResponse<?>> create(
+    public ResponseEntity<ApiResponse<CreateHallResponseDto>> create(
             @AuthenticationPrincipal AuthUser authUser,
             @Valid @RequestBody CreateHallRequestDto request) {
 
@@ -35,7 +37,7 @@ public class HallAdminController {
 
     @PutMapping("/{id}")
     @Operation(summary = "공연장 수정")
-    public ResponseEntity<ApiResponse<?>> update(
+    public ResponseEntity<ApiResponse<UpdateHallResponseDto>> update(
             @AuthenticationPrincipal AuthUser authUser,
             @PathVariable("id") Long id,
             @Valid @RequestBody UpdateHallRequestDto request) {
@@ -46,7 +48,7 @@ public class HallAdminController {
 
     @DeleteMapping("/{id}")
     @Operation(summary = "공연장 삭제")
-    public ResponseEntity<ApiResponse<?>> delete(
+    public ResponseEntity<ApiResponse<Void>> delete(
             @AuthenticationPrincipal AuthUser authUser, @PathVariable("id") Long id) {
 
         hallAdminService.delete(authUser, id);

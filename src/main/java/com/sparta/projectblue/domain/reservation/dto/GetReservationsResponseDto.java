@@ -17,7 +17,7 @@ public class GetReservationsResponseDto {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private final LocalDateTime reservationDate;
 
-    private final String HallName;
+    private final String hallName;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private final LocalDateTime round;
@@ -37,7 +37,7 @@ public class GetReservationsResponseDto {
         this.tickets = tickets;
         this.reservationId = reservationId;
         this.reservationDate = reservationDate;
-        this.HallName = hallName;
+        this.hallName = hallName;
         this.round = round;
         this.status = status;
     }

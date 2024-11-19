@@ -1,12 +1,13 @@
 package com.sparta.projectblue.config;
 
-import com.sparta.projectblue.sse.RedisSubscriber;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
+
+import com.sparta.projectblue.domain.sse.RedisSubscriber;
 
 @Configuration
 public class RedisPubSubConfig {
@@ -22,7 +23,7 @@ public class RedisPubSubConfig {
         return container;
     }
 
-    @Bean  // 메세지 처리 메서드
+    @Bean // 메세지 처리 메서드
     public MessageListenerAdapter messageListenerAdapter(RedisSubscriber redisSubscriber) {
         return new MessageListenerAdapter(redisSubscriber, "handleNotificationMessage");
     }

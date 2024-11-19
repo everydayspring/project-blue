@@ -8,10 +8,6 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
-import com.sparta.projectblue.domain.common.enums.Category;
-import com.sparta.projectblue.domain.round.repository.RoundRepository;
-import com.sparta.projectblue.domain.user.entity.User;
-import com.sparta.projectblue.domain.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -24,6 +20,7 @@ import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.sparta.projectblue.domain.common.dto.AuthUser;
+import com.sparta.projectblue.domain.common.enums.Category;
 import com.sparta.projectblue.domain.common.enums.UserRole;
 import com.sparta.projectblue.domain.hall.repository.HallRepository;
 import com.sparta.projectblue.domain.performance.dto.CreatePerformanceRequestDto;
@@ -33,10 +30,13 @@ import com.sparta.projectblue.domain.performance.dto.UpdatePerformanceResponseDt
 import com.sparta.projectblue.domain.performance.entity.Performance;
 import com.sparta.projectblue.domain.performance.repository.PerformanceRepository;
 import com.sparta.projectblue.domain.performer.repository.PerformerRepository;
-import com.sparta.projectblue.domain.performerPerformance.entity.PerformerPerformance;
-import com.sparta.projectblue.domain.performerPerformance.repository.PerformerPerformanceRepository;
+import com.sparta.projectblue.domain.performerperformance.entity.PerformerPerformance;
+import com.sparta.projectblue.domain.performerperformance.repository.PerformerPerformanceRepository;
 import com.sparta.projectblue.domain.poster.entity.Poster;
 import com.sparta.projectblue.domain.poster.repository.PosterRepository;
+import com.sparta.projectblue.domain.round.repository.RoundRepository;
+import com.sparta.projectblue.domain.user.entity.User;
+import com.sparta.projectblue.domain.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -143,8 +143,14 @@ public class PerformanceAdminService {
         posterRepository.save(poster);
 
         return new CreatePerformanceResponseDto(
-                savedPerformance.getId(), savedPerformance.getTitle(), savedPerformance.getStartDate(), savedPerformance.getEndDate(),
-                savedPerformance.getPrice(), savedPerformance.getCategory(), savedPerformance.getDescription(), savedPerformance.getDuration());
+                savedPerformance.getId(),
+                savedPerformance.getTitle(),
+                savedPerformance.getStartDate(),
+                savedPerformance.getEndDate(),
+                savedPerformance.getPrice(),
+                savedPerformance.getCategory(),
+                savedPerformance.getDescription(),
+                savedPerformance.getDuration());
     }
 
     @Transactional
@@ -183,15 +189,13 @@ public class PerformanceAdminService {
 
         List<Performance> performances = performanceRepository.findAllById(performanceId);
 
-        System.out.println("List size : " + performances.size());
-
         if (performances.isEmpty()) {
             throw new IllegalArgumentException("해당 공연이 존재하지 않습니다.");
         }
 
         performanceRepository.deleteAll(performances);
 
-        //관련 회차 삭제
+        // 관련 회차 삭제
         roundRepository.deleteByPerformanceId(performanceId);
 
         // 공연, 출연자 테이블 연관데이터 삭제
@@ -212,10 +216,12 @@ public class PerformanceAdminService {
 
     public void hasRole(AuthUser authUser) {
         // DB에서의 권한도 검증
-        User user = userRepository.findById(authUser.getId()).orElseThrow(() ->
-                new IllegalArgumentException("존재하지 않는 유저입니다."));
+        User user =
+                userRepository
+                        .findById(authUser.getId())
+                        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
 
-        if (!(user.getUserRole() == UserRole.ROLE_ADMIN)) {
+        if (user.getUserRole() != UserRole.ROLE_ADMIN) {
             throw new IllegalArgumentException("관리자만 접근할 수 있습니다.");
         }
     }
@@ -226,7 +232,7 @@ public class PerformanceAdminService {
                 performerPerformanceRepository.findAllByPerformanceId(performanceId);
 
         if (performerPerformances.isEmpty()) {
-            throw new IllegalArgumentException("출연자가 존재하지 않습니다.");
+            return;
         }
 
         performerPerformanceRepository.deleteAll(performerPerformances);
@@ -251,13 +257,13 @@ public class PerformanceAdminService {
     @Transactional
     public void addPerformer(Long performanceId, Long performerId) {
 
-       performanceRepository.findById(performanceId).orElseThrow(() ->
-               new IllegalArgumentException("공연을 찾을 수 없습니다.")
-       );
+        if (!performanceRepository.existsById(performanceId)) {
+            throw new IllegalArgumentException("공연을 찾을 수 없습니다.");
+        }
 
-        performerRepository.findById(performerId).orElseThrow(() ->
-            new IllegalArgumentException("배우를 찾을 수 없습니다.")
-        );
+        if (!performerRepository.existsById(performerId)) {
+            throw new IllegalArgumentException("배우를 찾을 수 없습니다.");
+        }
 
         if (performerPerformanceRepository.existsByPerformanceIdAndPerformerId(
                 performanceId, performerId)) {
@@ -273,13 +279,13 @@ public class PerformanceAdminService {
     @Transactional
     public void removePerformer(Long performanceId, Long performerId) {
 
-        performanceRepository.findById(performanceId).orElseThrow(() ->
-                new IllegalArgumentException("공연을 찾을 수 없습니다.")
-        );
+        if (!performanceRepository.existsById(performanceId)) {
+            throw new IllegalArgumentException("공연을 찾을 수 없습니다.");
+        }
 
-        performerRepository.findById(performerId).orElseThrow(() ->
-                new IllegalArgumentException("배우를 찾을 수 없습니다.")
-        );
+        if (!performerRepository.existsById(performerId)) {
+            throw new IllegalArgumentException("배우를 찾을 수 없습니다.");
+        }
 
         PerformerPerformance performerPerformance =
                 performerPerformanceRepository
@@ -288,6 +294,5 @@ public class PerformanceAdminService {
                                 () -> new IllegalArgumentException("해당 배우는 이 공연에 등록되어 있지 않습니다."));
 
         performerPerformanceRepository.delete(performerPerformance);
-
     }
 }

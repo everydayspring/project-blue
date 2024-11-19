@@ -1,8 +1,8 @@
 package com.sparta.projectblue.domain.common.enums;
 
-import lombok.Getter;
-
 import java.util.Arrays;
+
+import lombok.Getter;
 
 @Getter
 public enum Category {

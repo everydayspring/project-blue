@@ -9,6 +9,7 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -49,6 +50,7 @@ public class SearchDocument {
     @Field(type = FieldType.Object)
     private Hall hall;
 
+    @Builder
     public SearchDocument(
             Long performanceId,
             Long hallId,

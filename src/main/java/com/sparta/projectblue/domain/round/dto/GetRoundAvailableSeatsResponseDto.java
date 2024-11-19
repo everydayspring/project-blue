@@ -4,12 +4,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+
 import lombok.Getter;
 
 @Getter
 public class GetRoundAvailableSeatsResponseDto {
 
-    private final String PerformanceTitle;
+    private final String performanceTitle;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private final LocalDateTime roundDate;
@@ -19,7 +20,7 @@ public class GetRoundAvailableSeatsResponseDto {
     public GetRoundAvailableSeatsResponseDto(
             String performanceTitle, LocalDateTime roundDate, List<Integer> seats) {
 
-        PerformanceTitle = performanceTitle;
+        this.performanceTitle = performanceTitle;
         this.roundDate = roundDate;
         this.seats = seats;
     }

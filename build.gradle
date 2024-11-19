@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.3.4'
 	id 'io.spring.dependency-management' version '1.1.6'
+//	id 'com.diffplug.spotless' version '6.23.3'
 }
 
 group = 'com.sparta'
@@ -23,8 +24,6 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
 
-	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
-	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -90,18 +89,36 @@ dependencies {
 	// mail
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
 
-
 	// monitoring
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'io.micrometer:micrometer-core'
 	implementation 'io.micrometer:micrometer-registry-prometheus'
 
-
 	// PaymentTest
 	testImplementation 'com.squareup.okhttp3:mockwebserver:4.9.3'
 
+	// logback
+	implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+//tasks.named('compileJava') {
+//	dependsOn 'spotlessApply'
+//}
+//
+//spotless {
+//	java {
+//		googleJavaFormat().aosp()
+//		// 아래 순서로 import문 정렬
+//		importOrder('java', 'javax', 'jakarta', 'org', 'com')
+//		// 사용하지 않는 import 제거
+//		removeUnusedImports()
+//		// 각 라인 끝에 있는 공백을 제거
+//		trimTrailingWhitespace()
+//		// 파일 끝에 새로운 라인 추가
+//		endWithNewline()
+//	}
+//}

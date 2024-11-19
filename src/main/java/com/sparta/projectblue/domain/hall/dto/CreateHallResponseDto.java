@@ -14,6 +14,7 @@ public class CreateHallResponseDto {
     private final String name;
     private final String address;
     private final Integer seats;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private final LocalDateTime createdAt;
 

@@ -1,10 +1,7 @@
 package com.sparta.projectblue.aop;
 
-import com.sparta.projectblue.config.AopForTransaction;
-import com.sparta.projectblue.config.CustomSpringELParser;
-import com.sparta.projectblue.config.DistributedLock;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.lang.reflect.Method;
+
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -13,7 +10,12 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.Method;
+import com.sparta.projectblue.config.AopForTransaction;
+import com.sparta.projectblue.config.CustomSpringELParser;
+import com.sparta.projectblue.config.DistributedLock;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Aspect
@@ -49,20 +51,17 @@ public class DistributedLockAspect {
                             distributedLock.leaseTime(),
                             distributedLock.timeUnit());
             if (!available) {
-                return new IllegalStateException("락을 획득하지 못했습니다.");
-            }else{
+                throw new IllegalStateException("락을 획득하지 못했습니다.");
+            } else {
                 log.info("락을 획득");
             }
             return aopForTransaction.proceed(joinPoint); // 락 획득 시 메서드 호출하여 실제 작업 수행
         } catch (InterruptedException e) {
-            throw new InterruptedException("인터럽트 발생");
+            log.warn("인터럽트 발생", e);
+            throw e;
         } finally {
-            try {
-                lock.unlock();
-                log.info("lock 해제 완료");
-            } catch (IllegalMonitorStateException e) {
-                log.info("lock 이 이미 종료 되었습니다.");
-            }
+            lock.unlock();
+            log.info("lock 해제 완료");
         }
     }
 }

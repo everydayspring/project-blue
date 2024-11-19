@@ -94,6 +94,8 @@ logging:
     org.springframework.data.redis: DEBUG
     org.springframework.cache: DEBUG
     root: INFO # 기본 로그 레벨
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
 management:
   endpoint:

@@ -14,7 +14,6 @@ public enum UserRole {
     private final String userRole;
 
     public static UserRole of(String role) {
-
         return Arrays.stream(UserRole.values())
                 .filter(r -> r.name().equalsIgnoreCase(role))
                 .findFirst()
@@ -25,5 +24,9 @@ public enum UserRole {
 
         public static final String USER = "ROLE_USER";
         public static final String ADMIN = "ROLE_ADMIN";
+
+        private Authority() {
+            throw new UnsupportedOperationException("Utility class");
+        }
     }
 }

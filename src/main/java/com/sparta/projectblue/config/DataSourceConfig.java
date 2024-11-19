@@ -1,6 +1,10 @@
 package com.sparta.projectblue.config;
 
-import com.zaxxer.hikari.HikariDataSource;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.sql.DataSource;
+
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
@@ -10,9 +14,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
 
-import javax.sql.DataSource;
-import java.util.HashMap;
-import java.util.Map;
+import com.zaxxer.hikari.HikariDataSource;
 
 @Configuration
 @Profile("prod")

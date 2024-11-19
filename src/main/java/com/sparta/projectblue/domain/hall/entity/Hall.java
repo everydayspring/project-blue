@@ -1,10 +1,12 @@
 package com.sparta.projectblue.domain.hall.entity;
 
-import com.sparta.projectblue.domain.common.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
+
+import com.sparta.projectblue.domain.common.entity.BaseEntity;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -44,5 +46,5 @@ public class Hall extends BaseEntity {
         if (seats != null && seats > 0) {
             this.seats = seats;
         }
-     }
     }
+}

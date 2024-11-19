@@ -1,16 +1,13 @@
 package com.sparta.projectblue.domain.round.controller;
 
-import java.time.LocalDateTime;
-
-import jakarta.validation.Valid;
-
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.sparta.projectblue.config.ApiResponse;
-import com.sparta.projectblue.domain.common.enums.PerformanceStatus;
-import com.sparta.projectblue.domain.round.dto.CreateRoundRequestDto;
-import com.sparta.projectblue.domain.round.dto.UpdateRoundRequestDto;
+import com.sparta.projectblue.domain.round.dto.GetRoundAvailableSeatsResponseDto;
 import com.sparta.projectblue.domain.round.service.RoundService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,10 +24,9 @@ public class RoundController {
 
     @GetMapping("/{id}")
     @Operation(summary = "예매가능 좌석 조회", description = "입력 회차의 예매 가능 좌석을 모두 출력")
-    public ResponseEntity<ApiResponse<?>> getAvailableSeats(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<GetRoundAvailableSeatsResponseDto>> getAvailableSeats(
+            @PathVariable Long id) {
 
         return ResponseEntity.ok(ApiResponse.success(roundService.getAvailableSeats(id)));
     }
-
-
 }

@@ -1,13 +1,12 @@
 package com.sparta.projectblue.domain.coupon.service;
 
-import com.sparta.projectblue.domain.common.dto.AuthUser;
-import com.sparta.projectblue.domain.common.enums.CouponStatus;
-import com.sparta.projectblue.domain.common.enums.CouponType;
-import com.sparta.projectblue.domain.common.enums.UserRole;
-import com.sparta.projectblue.domain.coupon.dto.GetCouponResponseDto;
-import com.sparta.projectblue.domain.coupon.entity.Coupon;
-import com.sparta.projectblue.domain.coupon.repository.CouponRepository;
-import com.sparta.projectblue.domain.usedCoupon.repository.UsedCouponRepository;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.any;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,31 +17,37 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.any;
-
+import com.sparta.projectblue.domain.common.dto.AuthUser;
+import com.sparta.projectblue.domain.common.enums.CouponStatus;
+import com.sparta.projectblue.domain.common.enums.CouponType;
+import com.sparta.projectblue.domain.common.enums.UserRole;
+import com.sparta.projectblue.domain.coupon.dto.GetCouponResponseDto;
+import com.sparta.projectblue.domain.coupon.entity.Coupon;
+import com.sparta.projectblue.domain.coupon.repository.CouponRepository;
+import com.sparta.projectblue.domain.usedcoupon.repository.UsedCouponRepository;
 
 @ExtendWith(SpringExtension.class)
-public class CouponServiceTest {
+class CouponServiceTest {
 
-    @Mock
-    private CouponRepository couponRepository;
+    @Mock private CouponRepository couponRepository;
 
-    @Mock
-    private UsedCouponRepository usedCouponRepository;
+    @Mock private UsedCouponRepository usedCouponRepository;
 
-    @InjectMocks
-    private CouponService couponService;
+    @InjectMocks private CouponService couponService;
 
     @Test
-    public void 쿠폰_선착순_발행_성공() {
+    void 쿠폰_선착순_발행_성공() {
         // given
-        Coupon coupon  = new Coupon("couponCode", CouponType.AMOUNT, CouponStatus.ACTIVE,
-                10, 0, 1000L, LocalDateTime.now(), LocalDateTime.now().plusDays(1));
+        Coupon coupon =
+                new Coupon(
+                        "couponCode",
+                        CouponType.AMOUNT,
+                        CouponStatus.ACTIVE,
+                        10,
+                        0,
+                        1000L,
+                        LocalDateTime.now(),
+                        LocalDateTime.now().plusDays(1));
 
         Long couponId = coupon.getId();
 
@@ -50,8 +55,7 @@ public class CouponServiceTest {
         given(usedCouponRepository.existsByCouponIdAndUserId(couponId, 1L)).willReturn(false);
         given(couponRepository.save(any(Coupon.class))).willReturn(coupon);
 
-        AuthUser authUser = new AuthUser(1L, "test@test.com",
-                "testUser", UserRole.ROLE_USER);
+        AuthUser authUser = new AuthUser(1L, "test@test.com", "testUser", UserRole.ROLE_USER);
 
         // when
         Coupon response = couponService.firstCoupon(authUser, couponId);
@@ -63,48 +67,74 @@ public class CouponServiceTest {
     }
 
     @Test
-    public void 이미_발급받은_쿠폰(){
+    void 이미_발급받은_쿠폰() {
         // given
-        Coupon coupon  = new Coupon("couponCode", CouponType.AMOUNT, CouponStatus.ACTIVE,
-                10, 0, 1000L, LocalDateTime.now(), LocalDateTime.now().plusDays(1));
+        Coupon coupon =
+                new Coupon(
+                        "couponCode",
+                        CouponType.AMOUNT,
+                        CouponStatus.ACTIVE,
+                        10,
+                        0,
+                        1000L,
+                        LocalDateTime.now(),
+                        LocalDateTime.now().plusDays(1));
 
         Long couponId = coupon.getId();
 
         given(couponRepository.findByIdOrElseThrow(couponId)).willReturn(coupon);
         given(usedCouponRepository.existsByCouponIdAndUserId(couponId, 1L)).willReturn(true);
 
-        AuthUser authUser = new AuthUser(1L, "test@test.com",
-                "testUser", UserRole.ROLE_USER);
+        AuthUser authUser = new AuthUser(1L, "test@test.com", "testUser", UserRole.ROLE_USER);
 
         // when, then
-        assertThrows(IllegalArgumentException.class, () -> couponService.firstCoupon(authUser, couponId),
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> couponService.firstCoupon(authUser, couponId),
                 "이미 발급받은 쿠폰입니다.");
     }
 
     @Test
-    public void 쿠폰_소진(){
+    void 쿠폰_소진() {
         // given
-        Coupon coupon  = new Coupon("couponCode", CouponType.AMOUNT, CouponStatus.ACTIVE,
-                2, 2, 1000L, LocalDateTime.now(), LocalDateTime.now().plusDays(1));
+        Coupon coupon =
+                new Coupon(
+                        "couponCode",
+                        CouponType.AMOUNT,
+                        CouponStatus.ACTIVE,
+                        2,
+                        2,
+                        1000L,
+                        LocalDateTime.now(),
+                        LocalDateTime.now().plusDays(1));
 
         Long couponId = coupon.getId();
 
         given(couponRepository.findByIdOrElseThrow(couponId)).willReturn(coupon);
         given(usedCouponRepository.existsByCouponIdAndUserId(couponId, 1L)).willReturn(false);
 
-        AuthUser authUser = new AuthUser(1L, "test@test.com",
-                "testUser", UserRole.ROLE_USER);
+        AuthUser authUser = new AuthUser(1L, "test@test.com", "testUser", UserRole.ROLE_USER);
 
         // when, then
-        assertThrows(IllegalArgumentException.class, () -> couponService.firstCoupon(authUser, couponId),
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> couponService.firstCoupon(authUser, couponId),
                 "쿠폰이 모두 소진되었습니다.");
     }
 
     @Test
-    public void 쿠폰_단건_조회(){
+    void 쿠폰_단건_조회() {
         // given
-        Coupon coupon  = new Coupon("couponCode", CouponType.AMOUNT, CouponStatus.ACTIVE,
-                1, 0, 1000L, LocalDateTime.now(), LocalDateTime.now().plusDays(1));
+        Coupon coupon =
+                new Coupon(
+                        "couponCode",
+                        CouponType.AMOUNT,
+                        CouponStatus.ACTIVE,
+                        1,
+                        0,
+                        1000L,
+                        LocalDateTime.now(),
+                        LocalDateTime.now().plusDays(1));
 
         Long couponId = coupon.getId();
 
@@ -122,22 +152,35 @@ public class CouponServiceTest {
     }
 
     @Test
-    public void 쿠폰_페이징_조회(){
+    void 쿠폰_페이징_조회() {
         // given
-        List<Coupon>  coupons = List.of(
-                new Coupon("couponCode", CouponType.AMOUNT, CouponStatus.ACTIVE,
-                        1, 0, 1000L, LocalDateTime.now(), LocalDateTime.now().plusDays(1)),
-                new Coupon("couponCode2", CouponType.RATE, CouponStatus.ACTIVE,
-                        2, 0, 20L, LocalDateTime.now(), LocalDateTime.now().plusDays(2)));
+        List<Coupon> coupons =
+                List.of(
+                        new Coupon(
+                                "couponCode",
+                                CouponType.AMOUNT,
+                                CouponStatus.ACTIVE,
+                                1,
+                                0,
+                                1000L,
+                                LocalDateTime.now(),
+                                LocalDateTime.now().plusDays(1)),
+                        new Coupon(
+                                "couponCode2",
+                                CouponType.RATE,
+                                CouponStatus.ACTIVE,
+                                2,
+                                0,
+                                20L,
+                                LocalDateTime.now(),
+                                LocalDateTime.now().plusDays(2)));
         Page<Coupon> couponPage = new PageImpl<>(coupons);
         Pageable pageable = PageRequest.of(0, 10);
 
         given(couponRepository.findAll(pageable)).willReturn(couponPage);
 
-        AuthUser authUser = new AuthUser(1L, "test@test.com",
-                "testUser", UserRole.ROLE_USER);
         // when
-        Page<GetCouponResponseDto> getCouponResponseDto = couponService.getUserCoupon(authUser, 1, 10);
+        Page<GetCouponResponseDto> getCouponResponseDto = couponService.getUserCoupon(1, 10);
 
         // then
         assertNotNull(getCouponResponseDto);
@@ -147,15 +190,23 @@ public class CouponServiceTest {
     }
 
     @Test
-    public void 쿠폰_사용_성공(){
+    void 쿠폰_사용_성공() {
         // given
         Long couponId = 1L;
         Long originPrice = 10000L;
         Long userId = 1L;
         Long reservationId = 1L;
 
-        Coupon coupon  = new Coupon("couponCode", CouponType.RATE, CouponStatus.ACTIVE,
-                1, 0, 50L, LocalDateTime.now(), LocalDateTime.now().plusDays(1));
+        Coupon coupon =
+                new Coupon(
+                        "couponCode",
+                        CouponType.RATE,
+                        CouponStatus.ACTIVE,
+                        1,
+                        0,
+                        50L,
+                        LocalDateTime.now(),
+                        LocalDateTime.now().plusDays(1));
 
         given(couponRepository.findByIdOrElseThrow(couponId)).willReturn(coupon);
         // 사용하지 않은 쿠폰
@@ -170,57 +221,87 @@ public class CouponServiceTest {
     }
 
     @Test
-    public void 이미_사용된_쿠폰(){
+    void 이미_사용된_쿠폰() {
         // given
         Long couponId = 1L;
         Long originPrice = 10000L;
         Long userId = 1L;
         Long reservationId = 1L;
 
-        Coupon coupon  = new Coupon("couponCode", CouponType.RATE, CouponStatus.USED,
-                1, 0, 50L, LocalDateTime.now(), LocalDateTime.now().plusDays(1));
+        Coupon coupon =
+                new Coupon(
+                        "couponCode",
+                        CouponType.RATE,
+                        CouponStatus.USED,
+                        1,
+                        0,
+                        50L,
+                        LocalDateTime.now(),
+                        LocalDateTime.now().plusDays(1));
 
         given(couponRepository.findByIdOrElseThrow(couponId)).willReturn(coupon);
 
         // when, then
-        assertThrows(IllegalArgumentException.class, () -> couponService.useCoupon(couponId,
-                originPrice, userId, reservationId), "이미 사용된 쿠폰 입니다.");
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> couponService.useCoupon(couponId, originPrice, userId, reservationId),
+                "이미 사용된 쿠폰 입니다.");
     }
 
     @Test
-    public void 기간_만료된_쿠폰(){
+    void 기간_만료된_쿠폰() {
         // given
         Long couponId = 1L;
         Long originPrice = 10000L;
         Long userId = 1L;
         Long reservationId = 1L;
 
-        Coupon coupon  = new Coupon("couponCode", CouponType.RATE, CouponStatus.EXPIRED,
-                1, 0, 50L, LocalDateTime.now(), LocalDateTime.now().plusDays(1));
+        Coupon coupon =
+                new Coupon(
+                        "couponCode",
+                        CouponType.RATE,
+                        CouponStatus.EXPIRED,
+                        1,
+                        0,
+                        50L,
+                        LocalDateTime.now(),
+                        LocalDateTime.now().plusDays(1));
 
         given(couponRepository.findByIdOrElseThrow(couponId)).willReturn(coupon);
 
         // when, then
-        assertThrows(IllegalArgumentException.class, () -> couponService.useCoupon(couponId,
-                originPrice, userId, reservationId), "기간 만료된 쿠폰 입니다.");
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> couponService.useCoupon(couponId, originPrice, userId, reservationId),
+                "기간 만료된 쿠폰 입니다.");
     }
 
     @Test
-    public void 이미_사용한_쿠폰(){
+    void 이미_사용한_쿠폰() {
         // given
         Long couponId = 1L;
         Long originPrice = 10000L;
         Long userId = 1L;
         Long reservationId = 1L;
 
-        Coupon coupon  = new Coupon("couponCode", CouponType.RATE, CouponStatus.EXPIRED,
-                1, 0, 50L, LocalDateTime.now(), LocalDateTime.now().plusDays(1));
+        Coupon coupon =
+                new Coupon(
+                        "couponCode",
+                        CouponType.RATE,
+                        CouponStatus.EXPIRED,
+                        1,
+                        0,
+                        50L,
+                        LocalDateTime.now(),
+                        LocalDateTime.now().plusDays(1));
 
         given(couponRepository.findByIdOrElseThrow(couponId)).willReturn(coupon);
         given(usedCouponRepository.existsByCouponIdAndUserId(couponId, userId)).willReturn(true);
 
         // when, then
-        assertThrows(IllegalArgumentException.class, () -> couponService.useCoupon(couponId,
-                originPrice, userId, reservationId), "이미 사용한 쿠폰 입니다.");
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> couponService.useCoupon(couponId, originPrice, userId, reservationId),
+                "이미 사용한 쿠폰 입니다.");
     }
 }
