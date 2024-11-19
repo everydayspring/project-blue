@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <configuration scan="true" scanPeriod="30 seconds">
-    <property resource="application.properties"/>
+    <property name="logstash_file_path" value="${LOGSTASH_FILE_PATH}"/>
+    <property name="logstash_destination" value="${LOGSTASH_DESTINATION}"/>
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n</pattern>
@@ -11,7 +12,7 @@
     <!-- 로컬 파일에 로그 저장 설정 -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern> ${LOGSTASH_FILE_PATH} </fileNamePattern>
+            <fileNamePattern>${logstash_file_path}</fileNamePattern>
             <maxHistory>14</maxHistory>
         </rollingPolicy>
         <encoder>
@@ -21,7 +22,7 @@
 
     <!--  logstash setting  -->
     <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <destination> ${LOGSTASH_DESTINATION} </destination>
+        <destination>${logstash_destination}</destination>
         <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
     </appender>
 
