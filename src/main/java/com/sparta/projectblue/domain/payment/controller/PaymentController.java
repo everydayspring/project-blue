@@ -59,7 +59,7 @@ public class PaymentController {
     @GetMapping("/payments/success")
     public String paymentRequest(HttpServletRequest request, Model model) {
 
-        return "/success";
+        return "success";
     }
 
     @GetMapping("/fail")
@@ -71,6 +71,6 @@ public class PaymentController {
         model.addAttribute("code", failCode);
         model.addAttribute("message", failMessage);
 
-        return "/fail";
+        return "fail";
     }
 }
